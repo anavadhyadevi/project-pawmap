@@ -1,0 +1,118 @@
+:root {
+  /* Color tokens — pulled from the existing PawMap UI */
+  --pm-forest: #14261B;       /* deep hero green */
+  --pm-forest-light: #1F3A29; /* secondary green surface */
+  --pm-cream: #F1ECE1;        /* warm section background */
+  --pm-cream-card: #FFFFFF;
+  --pm-ink: #1A1A17;          /* near-black text on cream */
+  --pm-paper: #FBF9F5;        /* off-white on dark */
+  --pm-sage: #6B8A73;         /* muted green accent / links on dark */
+  --pm-orange: #E07A3E;       /* primary CTA */
+  --pm-orange-dark: #C4622C;
+  --pm-mint: #2FA35A;         /* verified / available dot */
+  --pm-line: rgba(26, 26, 23, 0.12);
+  --pm-line-dark: rgba(251, 249, 245, 0.14);
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--pm-ink);
+  background: var(--pm-cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+.container-pm {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Buttons */
+.btn-pm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+.btn-pm:active { transform: translateY(1px); }
+
+.btn-pm--orange {
+  background: var(--pm-orange);
+  color: #fff;
+}
+.btn-pm--orange:hover { background: var(--pm-orange-dark); }
+
+.btn-pm--outline-dark {
+  background: transparent;
+  border-color: var(--pm-line-dark);
+  color: var(--pm-paper);
+}
+.btn-pm--outline-dark:hover { border-color: var(--pm-paper); }
+
+.btn-pm--outline-light {
+  background: transparent;
+  border-color: var(--pm-line);
+  color: var(--pm-ink);
+}
+.btn-pm--outline-light:hover { border-color: var(--pm-ink); }
+
+.btn-pm--full {
+  width: 100%;
+  justify-content: center;
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--pm-orange);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

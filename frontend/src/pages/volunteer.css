@@ -1,0 +1,129 @@
+.pm-volunteer-page { background: var(--pm-cream); }
+
+/* HERO */
+.pm-vol-hero {
+  background: var(--pm-forest);
+  color: var(--pm-paper);
+  padding: 90px 0 100px;
+}
+
+.pm-vol-hero__inner { max-width: 680px; }
+
+.pm-vol-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pm-mint);
+  margin-bottom: 22px;
+}
+
+.pm-vol-hero__title {
+  font-size: clamp(2.2rem, 4.6vw, 3.2rem);
+  line-height: 1.1;
+  font-weight: 600;
+  color: var(--pm-paper);
+}
+
+.pm-vol-hero__sub {
+  margin-top: 22px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: rgba(251, 249, 245, 0.75);
+  max-width: 540px;
+}
+
+.pm-vol-hero__actions {
+  margin-top: 34px;
+  display: flex;
+  gap: 14px;
+}
+
+/* STEPS */
+.pm-vol-steps { padding: 80px 0; }
+
+.pm-vol-steps__eyebrow { color: var(--pm-orange-dark); margin-bottom: 10px; }
+
+.pm-vol-steps__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+  max-width: 480px;
+}
+
+.pm-vol-steps__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.pm-vol-step__num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--pm-orange);
+  margin-bottom: 14px;
+}
+
+.pm-vol-step h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.pm-vol-step p {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(26, 26, 23, 0.62);
+  margin: 0;
+}
+
+/* EXPECTATIONS */
+.pm-vol-expect { padding: 0 0 80px; }
+
+.pm-vol-expect__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pm-vol-expect__card {
+  background: var(--pm-forest-light);
+  color: var(--pm-paper);
+  border-radius: var(--radius-l);
+  padding: 28px 24px;
+}
+
+.pm-vol-expect__icon {
+  font-size: 1.5rem;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.pm-vol-expect__card h3 { font-size: 1rem; margin-bottom: 8px; }
+.pm-vol-expect__card p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(251, 249, 245, 0.7);
+  margin: 0;
+}
+
+/* CTA */
+.pm-vol-cta { padding: 20px 0 90px; }
+
+.pm-vol-cta__inner {
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  padding: 56px 40px;
+  text-align: center;
+}
+
+.pm-vol-cta__inner h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; }
+.pm-vol-cta__inner p {
+  color: rgba(26, 26, 23, 0.6);
+  margin-bottom: 26px;
+}
+
+@media (max-width: 900px) {
+  .pm-vol-steps__grid, .pm-vol-expect__grid { grid-template-columns: 1fr; }
+  .pm-vol-hero { padding: 60px 0 70px; }
+}

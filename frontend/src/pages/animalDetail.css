@@ -1,0 +1,151 @@
+.pm-animal-detail-page { background: var(--pm-cream); min-height: 100vh; }
+
+.pm-animal-detail { padding: 40px 24px 90px; }
+
+.pm-animal-detail__back {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--pm-forest);
+  margin-bottom: 28px;
+}
+.pm-animal-detail__back:hover { text-decoration: underline; }
+
+.pm-animal-detail__grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* MAIN COLUMN */
+.pm-animal-detail__photo {
+  position: relative;
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 24px;
+}
+.pm-animal-detail__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pm-animal-detail__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pm-animal-detail__head h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.pm-animal-detail__meta {
+  font-size: 0.95rem;
+  color: rgba(26, 26, 23, 0.6);
+  margin: 8px 0 10px;
+}
+
+.pm-animal-detail__rating { font-size: 0.95rem; }
+
+.pm-animal-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 30px;
+}
+
+.pm-info-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  color: var(--pm-ink);
+}
+.pm-info-pill--good {
+  background: rgba(47, 163, 90, 0.12);
+  border-color: transparent;
+  color: var(--pm-mint);
+}
+
+.pm-animal-detail__subhead {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.pm-animal-detail__story {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: rgba(26, 26, 23, 0.7);
+  max-width: 560px;
+}
+
+/* SIDE FORM */
+.pm-animal-detail__side {
+  position: sticky;
+  top: 96px;
+}
+
+.pm-animal-detail__form {
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  padding: 28px 26px;
+}
+
+.pm-animal-detail__form h3 {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+
+.pm-animal-detail__form-sub {
+  font-size: 0.88rem;
+  color: rgba(26, 26, 23, 0.6);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+/* Success state */
+.pm-animal-detail__done {
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  padding: 36px 28px;
+  text-align: center;
+}
+.pm-animal-detail__done span:first-child {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 14px;
+}
+.pm-animal-detail__done h3 { font-size: 1.2rem; margin-bottom: 10px; }
+.pm-animal-detail__done p {
+  font-size: 0.9rem;
+  color: rgba(26, 26, 23, 0.62);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+/* Not found */
+.pm-animal-notfound {
+  max-width: 480px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 0 24px;
+}
+.pm-animal-notfound h1 { font-size: 1.6rem; margin-bottom: 12px; }
+.pm-animal-notfound p {
+  color: rgba(26, 26, 23, 0.6);
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .pm-animal-detail__grid { grid-template-columns: 1fr; }
+  .pm-animal-detail__side { position: static; }
+}

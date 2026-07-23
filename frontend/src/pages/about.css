@@ -1,0 +1,125 @@
+.pm-about-page { background: var(--pm-cream); }
+
+/* HERO */
+.pm-about-hero {
+  background: var(--pm-forest);
+  color: var(--pm-paper);
+  padding: 90px 0 70px;
+}
+
+.pm-about-hero__inner { max-width: 680px; }
+
+.pm-about-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pm-mint);
+  margin-bottom: 22px;
+}
+
+.pm-about-hero__title {
+  font-size: clamp(2.2rem, 4.6vw, 3.2rem);
+  line-height: 1.1;
+  font-weight: 600;
+  color: var(--pm-paper);
+}
+
+.pm-about-hero__sub {
+  margin-top: 22px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: rgba(251, 249, 245, 0.75);
+  max-width: 560px;
+}
+
+/* STATS */
+.pm-about-stats {
+  background: var(--pm-forest);
+  padding: 0 0 70px;
+}
+
+.pm-about-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--pm-line-dark);
+  padding-top: 40px;
+}
+
+.pm-about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pm-about-stat__value {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  color: var(--pm-orange);
+}
+
+.pm-about-stat__label {
+  font-size: 0.85rem;
+  color: rgba(251, 249, 245, 0.65);
+}
+
+/* VALUES */
+.pm-about-values { padding: 80px 0; }
+
+.pm-about-values__eyebrow { color: var(--pm-orange-dark); margin-bottom: 10px; }
+
+.pm-about-values__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+  max-width: 480px;
+}
+
+.pm-about-values__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.pm-about-value__icon {
+  font-size: 1.5rem;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.pm-about-value h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.pm-about-value p {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(26, 26, 23, 0.62);
+  margin: 0;
+}
+
+/* CTA */
+.pm-about-cta { padding: 0 0 90px; }
+
+.pm-about-cta__inner {
+  background: var(--pm-forest);
+  color: var(--pm-paper);
+  border-radius: var(--radius-l);
+  padding: 56px 40px;
+  text-align: center;
+}
+
+.pm-about-cta__inner h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; }
+.pm-about-cta__inner p {
+  color: rgba(251, 249, 245, 0.7);
+  margin-bottom: 26px;
+}
+
+.pm-about-cta__actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .pm-about-stats__grid { grid-template-columns: repeat(2, 1fr); }
+  .pm-about-values__grid { grid-template-columns: 1fr; }
+}

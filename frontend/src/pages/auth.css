@@ -1,0 +1,125 @@
+.pm-auth {
+  min-height: calc(100vh - 72px);
+  background: var(--pm-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+}
+
+.pm-auth__card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  padding: 40px 36px;
+}
+
+.pm-auth__eyebrow {
+  color: var(--pm-orange-dark);
+  margin-bottom: 10px;
+}
+
+.pm-auth__title {
+  font-size: 1.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pm-auth__sub {
+  font-size: 0.92rem;
+  color: rgba(26, 26, 23, 0.6);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.pm-field {
+  margin-bottom: 18px;
+}
+
+.pm-field label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.pm-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--pm-line);
+  background: var(--pm-cream);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+}
+
+.pm-field input:focus {
+  outline: 2px solid var(--pm-orange);
+  outline-offset: 1px;
+  background: #fff;
+}
+
+.pm-field--error input { border-color: #C4402C; }
+.pm-field__error {
+  color: #C4402C;
+  font-size: 0.78rem;
+  margin-top: 6px;
+}
+
+.pm-auth__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-bottom: 22px;
+}
+
+.pm-auth__forgot { font-weight: 600; color: var(--pm-orange-dark); }
+
+.pm-auth__switch {
+  text-align: center;
+  font-size: 0.88rem;
+  margin-top: 22px;
+  color: rgba(26, 26, 23, 0.65);
+}
+.pm-auth__switch a { font-weight: 600; color: var(--pm-forest); }
+
+/* Role selector (signup) */
+.pm-role-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.pm-role-option {
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-m);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--pm-cream);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pm-role-option__icon { display: block; font-size: 1.3rem; margin-bottom: 6px; }
+
+.pm-role-option--active {
+  border-color: var(--pm-forest);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--pm-forest);
+}
+
+.pm-role-note {
+  font-size: 0.8rem;
+  background: rgba(224, 122, 62, 0.1);
+  color: var(--pm-orange-dark);
+  border-radius: var(--radius-s);
+  padding: 10px 12px;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
