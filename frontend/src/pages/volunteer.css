@@ -127,3 +127,40 @@
   .pm-vol-steps__grid, .pm-vol-expect__grid { grid-template-columns: 1fr; }
   .pm-vol-hero { padding: 60px 0 70px; }
 }
+
+.pm-vol-apply { padding: 0 0 20px; }
+
+.pm-vol-apply__card {
+  max-width: 560px;
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  padding: 32px;
+}
+
+.pm-vol-apply__card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.pm-vol-apply__sub {
+  font-size: 0.88rem;
+  color: rgba(26, 26, 23, 0.6);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.pm-vol-apply__card--status {
+  text-align: center;
+  padding: 40px 32px;
+}
+.pm-vol-apply__card--status span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 14px;
+}
+.pm-vol-apply__card--status p {
+  color: rgba(26, 26, 23, 0.62);
+  line-height: 1.55;
+  margin: 0;
+}

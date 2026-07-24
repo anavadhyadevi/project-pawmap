@@ -123,3 +123,10 @@
   margin-bottom: 22px;
   line-height: 1.5;
 }
+
+.pm-auth__server-error {
+  background: rgba(196, 64, 44, 0.08);
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  margin-bottom: 18px;
+}

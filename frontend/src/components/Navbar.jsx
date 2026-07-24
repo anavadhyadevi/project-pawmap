@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { label: 'Report', to: '/report' },
   { label: 'Volunteer', to: '/volunteer' },
   { label: 'Adopt', to: '/adopt' },
+  { label: 'Lost & Found', to: '/lost-found' },
   { label: 'Analytics', to: '/analytics' },
   { label: 'About', to: '/about' },
 ]
@@ -23,6 +24,9 @@ export default function Navbar({ variant = 'light' }) {
     logout()
     navigate('/')
   }
+
+  const pendingApproval =
+    isLoggedIn && ['Volunteer', 'NGO_Admin'].includes(user.role) && !user.is_verified
 
   return (
     <header className={`pm-nav ${isDark ? 'pm-nav--dark' : 'pm-nav--light'}`}>
@@ -45,7 +49,12 @@ export default function Navbar({ variant = 'light' }) {
         <div className="pm-nav__actions">
           {isLoggedIn ? (
             <>
-              <span className="pm-nav__user">Hi, {user.name}</span>
+              {pendingApproval && (
+                <span className="pm-nav__pending" title="Your volunteer/NGO application is under review">
+                  Pending approval
+                </span>
+              )}
+              <span className="pm-nav__user">Hi, {user.full_name}</span>
               <button type="button" className="pm-nav__login pm-nav__logout" onClick={handleLogout}>
                 Log out
               </button>

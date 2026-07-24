@@ -1,0 +1,120 @@
+.pm-lf-page { background: var(--pm-cream); }
+
+/* HERO */
+.pm-lf-hero { padding: 56px 0 20px; }
+
+.pm-lf-hero__eyebrow { color: var(--pm-orange-dark); margin-bottom: 10px; }
+
+.pm-lf-hero__title {
+  font-size: 2.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  max-width: 620px;
+}
+
+.pm-lf-hero__sub {
+  font-size: 0.98rem;
+  color: rgba(26, 26, 23, 0.62);
+  max-width: 560px;
+  line-height: 1.55;
+  margin-bottom: 26px;
+}
+
+/* LIST */
+.pm-lf-list { padding: 36px 0 90px; }
+
+.pm-lf-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 32px;
+}
+
+.pm-lf-tab {
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: rgba(26, 26, 23, 0.6);
+}
+
+.pm-lf-tab--active {
+  background: var(--pm-forest);
+  color: var(--pm-paper);
+}
+
+.pm-lf-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pm-lf-card {
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.pm-lf-card__photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+}
+.pm-lf-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pm-lf-card__id {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(20, 38, 27, 0.75);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.pm-lf-card__status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+.pm-lf-card__status--unmatched { background: var(--pm-orange); }
+.pm-lf-card__status--matched { background: var(--pm-mint); }
+
+.pm-lf-card__body { padding: 18px; }
+
+.pm-lf-card__body h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+
+.pm-lf-card__meta {
+  font-size: 0.85rem;
+  color: rgba(26, 26, 23, 0.6);
+  margin: 0 0 6px;
+}
+
+.pm-lf-card__features {
+  font-size: 0.82rem;
+  color: rgba(26, 26, 23, 0.55);
+  margin: 8px 0 14px;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .pm-lf-grid { grid-template-columns: 1fr; }
+}

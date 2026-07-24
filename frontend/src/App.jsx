@@ -8,6 +8,8 @@ import AnimalDetail from './pages/AnimalDetail.jsx'
 import Volunteer from './pages/Volunteer.jsx'
 import About from './pages/About.jsx'
 import Analytics from './pages/Analytics.jsx'
+import LostFound from './pages/LostFound.jsx'
+import ReportLostFound from './pages/ReportLostFound.jsx'
 
 export default function App() {
   return (
@@ -21,6 +23,8 @@ export default function App() {
       <Route path="/volunteer" element={<Volunteer />} />
       <Route path="/about" element={<About />} />
       <Route path="/analytics" element={<Analytics />} />
+      <Route path="/lost-found" element={<LostFound />} />
+      <Route path="/lost-found/report" element={<ReportLostFound />} />
     </Routes>
   )
 }

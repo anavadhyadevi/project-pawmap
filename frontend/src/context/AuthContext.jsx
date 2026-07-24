@@ -2,20 +2,16 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext(null)
 
-const USER_KEY  = 'pawmap_user'
-const TOKEN_KEY = 'pawmap_token'
+const STORAGE_KEY = 'pawmap_auth'
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
-  const [token, setToken]     = useState(null)
+  const [auth, setAuth] = useState(null) // { user, tokens: { access, refresh } }
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     try {
-      const storedUser  = localStorage.getItem(USER_KEY)
-      const storedToken = localStorage.getItem(TOKEN_KEY)
-      if (storedUser)  setUser(JSON.parse(storedUser))
-      if (storedToken) setToken(storedToken)
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) setAuth(JSON.parse(stored))
     } catch {
       // ignore corrupt storage
     } finally {
@@ -23,22 +19,31 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  function login(userData, accessToken) {
-    setUser(userData)
-    setToken(accessToken)
-    localStorage.setItem(USER_KEY,  JSON.stringify(userData))
-    localStorage.setItem(TOKEN_KEY, accessToken)
+  // Call this with the exact response body from /api/users/login/ or /register/
+  // i.e. { user: {...}, tokens: { access, refresh } }
+  function login({ user, tokens }) {
+    const next = { user, tokens }
+    setAuth(next)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   }
 
   function logout() {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(TOKEN_KEY)
+    setAuth(null)
+    localStorage.removeItem(STORAGE_KEY)
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoggedIn: !!user, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user: auth?.user ?? null,
+        accessToken: auth?.tokens?.access ?? null,
+        refreshToken: auth?.tokens?.refresh ?? null,
+        isLoggedIn: !!auth?.user,
+        login,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
