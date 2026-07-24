@@ -114,12 +114,21 @@ SIMPLE_JWT = {
 }
 
 # ── CORS ───────────────────────────────────────────────────────────────────
-# Allows React frontend to talk to Django during development
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # React dev server
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept', 'accept-encoding', 'authorization',
+    'content-type', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
+]
 
 # ── Celery ─────────────────────────────────────────────────────────────────
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
