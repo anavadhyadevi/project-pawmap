@@ -87,3 +87,12 @@
   cursor: pointer;
   font-family: var(--font-body);
 }
+
+.pm-nav__pending {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--pm-orange-dark);
+  background: rgba(224, 122, 62, 0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
