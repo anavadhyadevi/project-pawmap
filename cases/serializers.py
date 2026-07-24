@@ -51,6 +51,8 @@ class CaseSerializer(serializers.ModelSerializer):
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):
+    photo = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model  = Case
         fields = [
@@ -70,6 +72,15 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Aggression level must be between 1 and 5.')
         return value
 
+    def validate_latitude(self, value):
+        if not -90 <= float(value) <= 90:
+            raise serializers.ValidationError('Invalid latitude.')
+        return value
+
+    def validate_longitude(self, value):
+        if not -180 <= float(value) <= 180:
+            raise serializers.ValidationError('Invalid longitude.')
+        return value
 
 class ClaimCaseSerializer(serializers.Serializer):
     note = serializers.CharField(max_length=500, required=False, default='')
