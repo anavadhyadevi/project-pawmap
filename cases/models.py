@@ -56,8 +56,8 @@ class Case(models.Model):
     case_id   = models.CharField(max_length=20, unique=True, editable=False)
 
     # ── location ─────────────────────────────────────────────
-    latitude   = models.DecimalField(max_digits=9, decimal_places=6)
-    longitude  = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude   = models.DecimalField(max_digits=10, decimal_places=6)
+    longitude  = models.DecimalField(max_digits=10, decimal_places=6)
     ward       = models.ForeignKey(
                     Ward, on_delete=models.SET_NULL,
                     null=True, blank=True, db_column='ward_name'

@@ -41,13 +41,12 @@ class CaseListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         case = serializer.save(
-            reporter=self.request.user,
+            reporter=self.request.user if self.request.user.is_authenticated else None,
             status='Open'
         )
-        # write initial status log
         CaseStatusLog.objects.create(
             case=case,
-            actor=self.request.user,
+            actor=self.request.user if self.request.user.is_authenticated else None,
             old_status='',
             new_status='Open',
             note='Case created'
@@ -55,6 +54,7 @@ class CaseListCreateView(generics.ListCreateAPIView):
         return case
 
     def create(self, request, *args, **kwargs):
+        print("REQUEST DATA:", request.data)  # add this line
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         case = self.perform_create(serializer)
