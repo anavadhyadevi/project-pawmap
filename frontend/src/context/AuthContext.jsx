@@ -2,16 +2,20 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext(null)
 
-const STORAGE_KEY = 'pawmap_user'
+const USER_KEY  = 'pawmap_user'
+const TOKEN_KEY = 'pawmap_token'
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser]       = useState(null)
+  const [token, setToken]     = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) setUser(JSON.parse(stored))
+      const storedUser  = localStorage.getItem(USER_KEY)
+      const storedToken = localStorage.getItem(TOKEN_KEY)
+      if (storedUser)  setUser(JSON.parse(storedUser))
+      if (storedToken) setToken(storedToken)
     } catch {
       // ignore corrupt storage
     } finally {
@@ -19,19 +23,22 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  function login(userData) {
-    // userData shape: { name, email, role }
+  function login(userData, accessToken) {
     setUser(userData)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userData))
+    setToken(accessToken)
+    localStorage.setItem(USER_KEY,  JSON.stringify(userData))
+    localStorage.setItem(TOKEN_KEY, accessToken)
   }
 
   function logout() {
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    setToken(null)
+    localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(TOKEN_KEY)
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, isLoggedIn: !!user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

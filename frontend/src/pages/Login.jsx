@@ -5,10 +5,11 @@ import { useAuth } from '../context/AuthContext.jsx'
 import './auth.css'
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { login } = useAuth()
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [errors, setErrors] = useState({})
+  const navigate    = useNavigate()
+  const { login }   = useAuth()
+  const [form, setForm]         = useState({ email: '', password: '' })
+  const [errors, setErrors]     = useState({})
+  const [apiError, setApiError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   function handleChange(e) {
@@ -29,19 +30,33 @@ export default function Login() {
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
-    try {
-      // Wire this up to POST /api/auth/login/ once the backend is available.
-      // const res = await fetch('/api/auth/login/', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(form),
-      // })
-      // const data = await res.json()
-      await new Promise((r) => setTimeout(r, 500))
+    setApiError('')
 
-      // Placeholder user object until the backend returns a real one.
-      login({ name: form.email.split('@')[0], email: form.email, role: 'user' })
+    try {
+      const res = await fetch('http://localhost:8000/api/users/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setApiError(data.error || 'Login failed. Please try again.')
+        return
+      }
+
+      // store user + access token
+      login(data.user, data.tokens.access)
+
+      // redirect based on role
+      if (data.user.role === 'NGO_Admin')  return navigate('/admin')
+      if (data.user.role === 'Volunteer')  return navigate('/volunteer')
+      if (data.user.role === 'Vet')        return navigate('/medical')
       navigate('/')
+
+    } catch (err) {
+      setApiError('Could not connect to server. Is the backend running?')
     } finally {
       setSubmitting(false)
     }
@@ -59,13 +74,17 @@ export default function Login() {
             adoption applications up to date.
           </p>
 
+          {apiError && (
+            <div className="pm-field--error" style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fca5a5' }}>
+              <p style={{ color: '#dc2626', fontSize: 13, margin: 0 }}>{apiError}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} noValidate>
             <div className={`pm-field ${errors.email ? 'pm-field--error' : ''}`}>
               <label htmlFor="email">Email address</label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="email" name="email" type="email"
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
@@ -77,9 +96,7 @@ export default function Login() {
             <div className={`pm-field ${errors.password ? 'pm-field--error' : ''}`}>
               <label htmlFor="password">Password</label>
               <input
-                id="password"
-                name="password"
-                type="password"
+                id="password" name="password" type="password"
                 autoComplete="current-password"
                 value={form.password}
                 onChange={handleChange}
