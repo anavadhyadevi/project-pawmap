@@ -21,7 +21,7 @@ const AGE_MAP = {
 
 export default function ReportStray() {
   const navigate      = useNavigate()
-  const { token, isLoggedIn } = useAuth()
+  const { accessToken, isLoggedIn } = useAuth()
 
   const [form, setForm] = useState({
     species:        'Dog',
@@ -127,7 +127,7 @@ export default function ReportStray() {
       const res = await fetch('http://localhost:8000/api/cases/', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
           // do NOT set Content-Type — browser sets it automatically for FormData
         },
         body,
