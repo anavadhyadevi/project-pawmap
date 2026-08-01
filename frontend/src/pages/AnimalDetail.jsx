@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
-import { getAnimalById } from '../data/animals.js'
+import { getAnimalById, getTemperamentScore } from '../data/animals.js'
 import './animalDetail.css'
 
 export default function AnimalDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const animal = getAnimalById(id)
-
+  const temperamentScore = animal ? getTemperamentScore(animal) : null
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
@@ -94,6 +94,30 @@ export default function AnimalDetail() {
 
             <h2 className="pm-animal-detail__subhead">About {animal.name}</h2>
             <p className="pm-animal-detail__story">{animal.story}</p>
+
+            {temperamentScore !== null && (
+              <div className="pm-temperament">
+                <div className="pm-temperament__head">
+                  <h2 className="pm-animal-detail__subhead">Temperament</h2>
+                  <span className="pm-temperament__score">{temperamentScore.toFixed(1)} / 5.0</span>
+                </div>
+                <p className="pm-temperament__note">
+                  Weighted toward more recent observations — {animal.name}'s behavior in the
+                  last few weeks counts more than how they acted right after rescue.
+                </p>
+                <ul className="pm-temperament__timeline">
+                  {animal.temperamentObservations.map((obs, i) => (
+                    <li key={i} className="pm-temperament__item">
+                      <span className="pm-temperament__item-score">{obs.score.toFixed(1)}</span>
+                      <div>
+                        <p className="pm-temperament__item-note">{obs.note}</p>
+                        <p className="pm-temperament__item-meta">{obs.date} · {obs.observedBy}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* RIGHT: inquiry form */}

@@ -18,6 +18,21 @@ export default function Login() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
+  // DEV ONLY — remove before final submission.
+  function devLogin(role, isVerified = true) {
+    login({
+      user: {
+        user_id: 'USR-DEMO',
+        full_name: role === 'NGO_Admin' ? 'Demo NGO Shelter' : 'Demo ' + role,
+        email: 'demo@pawmap.test',
+        role,
+        is_verified: isVerified,
+      },
+      tokens: { access: 'demo-token', refresh: 'demo-token' },
+    })
+    navigate('/')
+  }
+
   function validate() {
     const next = {}
     if (!form.email.trim()) next.email = 'Enter your email address.'
@@ -100,6 +115,20 @@ export default function Login() {
               {submitting ? 'Logging in…' : 'Log in'}
             </button>
           </form>
+
+          {/* DEV ONLY — remove before final submission. Lets us demo
+              role-gated pages (like /volunteer/dashboard) without a
+              running backend. Not a real auth path. */}
+          <div className="pm-auth__dev">
+            <p>Demo shortcuts (no backend needed):</p>
+            <div className="pm-auth__dev-buttons">
+              <button type="button" onClick={() => devLogin('Reporter')}>Log in as User</button>
+              <button type="button" onClick={() => devLogin('Volunteer', true)}>Log in as Volunteer (verified)</button>
+              <button type="button" onClick={() => devLogin('Volunteer', false)}>Log in as Volunteer (pending)</button>
+              <button type="button" onClick={() => devLogin('NGO_Admin', false)}>Log in as NGO (pending)</button>
+              <button type="button" onClick={() => devLogin('NGO_Admin', true)}>Log in as NGO (verified)</button>
+            </div>
+          </div>
 
           <p className="pm-auth__switch">
             New to PawMap? <Link to="/signup">Get started</Link>

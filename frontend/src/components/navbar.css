@@ -96,3 +96,7 @@
   padding: 4px 10px;
   border-radius: 999px;
 }
+
+.pm-nav__link--dashboard {
+  font-weight: 700;
+}

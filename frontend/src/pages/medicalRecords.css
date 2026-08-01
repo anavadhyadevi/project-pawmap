@@ -1,0 +1,175 @@
+.pm-mr-page { background: var(--pm-cream); }
+
+/* HERO */
+.pm-mr-hero { padding: 48px 0 20px; }
+
+.pm-mr-hero__eyebrow { color: var(--pm-orange-dark); margin-bottom: 10px; }
+
+.pm-mr-hero__title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pm-mr-hero__sub {
+  font-size: 0.95rem;
+  color: rgba(26, 26, 23, 0.6);
+  max-width: 500px;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.pm-mr-search {
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-cream-card);
+  font-size: 0.92rem;
+  width: 100%;
+  max-width: 320px;
+}
+.pm-mr-search:focus {
+  outline: 2px solid var(--pm-orange);
+  outline-offset: 1px;
+}
+
+/* LIST */
+.pm-mr-list { padding: 20px 0 90px; }
+
+.pm-mr-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pm-mr-card {
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.pm-mr-card__summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pm-mr-card__photo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-m);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pm-mr-card__info { flex: 1; }
+.pm-mr-card__info h3 { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+.pm-mr-card__info p {
+  font-size: 0.82rem;
+  color: rgba(26, 26, 23, 0.55);
+  margin: 0;
+}
+
+.pm-mr-card__chevron {
+  font-size: 1.3rem;
+  color: var(--pm-forest);
+  flex-shrink: 0;
+}
+
+.pm-mr-card__details {
+  padding: 0 20px 22px;
+  border-top: 1px solid var(--pm-line);
+}
+
+/* Timeline */
+.pm-mr-timeline {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pm-mr-timeline__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pm-mr-type {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.pm-mr-type--vaccination { background: rgba(47, 163, 90, 0.12); color: var(--pm-mint); }
+.pm-mr-type--treatment { background: rgba(224, 122, 62, 0.12); color: var(--pm-orange-dark); }
+.pm-mr-type--diagnosis { background: rgba(20, 38, 27, 0.08); color: var(--pm-forest); }
+
+.pm-mr-timeline__detail {
+  font-size: 0.9rem;
+  color: var(--pm-ink);
+  margin: 0 0 2px;
+}
+.pm-mr-timeline__meta {
+  font-size: 0.78rem;
+  color: rgba(26, 26, 23, 0.5);
+  margin: 0;
+}
+
+/* Add record */
+.pm-mr-add {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--pm-line);
+}
+.pm-mr-add h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.pm-mr-add__row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pm-mr-add__row select {
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--pm-line);
+  background: var(--pm-cream);
+  font-size: 0.88rem;
+}
+.pm-mr-add__row input {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--pm-line);
+  background: var(--pm-cream);
+  font-size: 0.88rem;
+}
+
+.pm-mr-empty {
+  padding: 50px 24px;
+  text-align: center;
+  color: rgba(26, 26, 23, 0.55);
+  background: var(--pm-cream-card);
+  border: 1px solid var(--pm-line);
+  border-radius: var(--radius-l);
+}
+
+@media (max-width: 600px) {
+  .pm-mr-add__row { flex-direction: column; }
+  .pm-mr-add__row input { min-width: 0; }
+}

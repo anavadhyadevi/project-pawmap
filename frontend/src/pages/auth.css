@@ -130,3 +130,30 @@
   border-radius: var(--radius-s);
   margin-bottom: 18px;
 }
+
+/* DEV ONLY — remove alongside the dev panel in Login.jsx */
+.pm-auth__dev {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--pm-line);
+}
+.pm-auth__dev p {
+  font-size: 0.78rem;
+  color: rgba(26, 26, 23, 0.5);
+  margin-bottom: 10px;
+}
+.pm-auth__dev-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pm-auth__dev-buttons button {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--pm-line);
+  background: transparent;
+  cursor: pointer;
+  color: rgba(26, 26, 23, 0.65);
+}
+.pm-auth__dev-buttons button:hover { border-color: var(--pm-ink); color: var(--pm-ink); }
