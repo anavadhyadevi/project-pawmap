@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
+import { HOTSPOTS, NOISE_POINT_COUNT } from '../data/hotspots.js'
 import './analytics.css'
 
 const SUMMARY = [
@@ -84,6 +85,39 @@ export default function Analytics() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* HOTSPOTS — DBSCAN clustering over reported case coordinates */}
+      <section className="pm-hotspots">
+        <div className="container-pm">
+          <p className="eyebrow pm-hotspots__eyebrow">Geospatial intelligence</p>
+          <h2 className="pm-hotspots__title">Where strays are being reported most.</h2>
+          <p className="pm-hotspots__sub">
+            Clusters identified via DBSCAN over reported case coordinates — dense pockets of
+            activity get flagged automatically rather than eyeballed off a raw map.
+          </p>
+
+          <div className="pm-hotspots__grid">
+            {HOTSPOTS.map((h, i) => (
+              <div key={h.id} className="pm-hotspot-card">
+                <span className="pm-hotspot-card__rank">#{i + 1}</span>
+                <h3>{h.ward}</h3>
+                <p className="pm-hotspot-card__count">{h.caseCount} cases</p>
+                <div className="pm-hotspot-card__meta">
+                  <span>~{h.radiusM}m radius</span>
+                  <span>Mostly {h.dominantSpecies}</span>
+                  <span className={`pm-hotspot-card__severity pm-hotspot-card__severity--${h.avgSeverity.toLowerCase()}`}>
+                    {h.avgSeverity} severity
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="pm-hotspots__noise">
+            + {NOISE_POINT_COUNT} reports were too sparse to form a cluster (DBSCAN noise points) — still tracked individually, just not part of a hotspot.
+          </p>
         </div>
       </section>
 

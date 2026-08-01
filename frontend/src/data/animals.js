@@ -14,6 +14,11 @@ export const ANIMALS = [
       'Bruno was found limping near a construction site and has since recovered fully. He\u2019s calm around people, gets along with other dogs, and loves a good walk.',
     vaccinated: true,
     neutered: true,
+    temperamentObservations: [
+      { date: '2025-12-10', score: 2.5, note: 'Skittish, kept distance from volunteers', observedBy: 'Rahul Menon' },
+      { date: '2025-12-22', score: 3.8, note: 'Approached for food, tail wagging', observedBy: 'Anjali Rao' },
+      { date: '2026-01-08', score: 4.6, note: 'Calm during vet checkup, friendly with other dogs', observedBy: 'Dr. Priya Nair' },
+    ],
   },
   {
     id: 'A-0138',
@@ -30,6 +35,10 @@ export const ANIMALS = [
       'Mitthu was rescued from a storm drain as a tiny kitten and has been hand-raised since. Very affectionate, loves lap time, still a little nervous around loud noises.',
     vaccinated: true,
     neutered: false,
+    temperamentObservations: [
+      { date: '2025-12-28', score: 4.2, note: 'Affectionate from day one, purrs when held', observedBy: 'Divya Shetty' },
+      { date: '2026-01-10', score: 4.7, note: 'Very comfortable, seeks out attention', observedBy: 'Divya Shetty' },
+    ],
   },
   {
     id: 'A-0131',
@@ -99,4 +108,28 @@ export const ANIMALS = [
 
 export function getAnimalById(id) {
   return ANIMALS.find((a) => a.id === id)
+}
+
+// Recency-weighted temperament scoring: each observation counts less the
+// older it is, so a dog that was fearful right after rescue but has been
+// calm in every observation since reads as "calm" — not stuck at its
+// worst-ever score. Exponential decay with a ~14 day half-life.
+export function getTemperamentScore(animal) {
+  const observations = animal.temperamentObservations || []
+  if (observations.length === 0) return null
+
+  const now = Date.now()
+  const HALF_LIFE_DAYS = 14
+
+  let weightedSum = 0
+  let totalWeight = 0
+
+  observations.forEach((obs) => {
+    const ageDays = (now - new Date(obs.date).getTime()) / (1000 * 60 * 60 * 24)
+    const weight = Math.pow(0.5, ageDays / HALF_LIFE_DAYS)
+    weightedSum += obs.score * weight
+    totalWeight += weight
+  })
+
+  return totalWeight > 0 ? weightedSum / totalWeight : null
 }

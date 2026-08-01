@@ -1,0 +1,60 @@
+export const CASES = [
+  {
+    id: 'CASE-0201',
+    species: 'Dog',
+    severity: 'high',
+    injuryType: 'Hit by vehicle, visible limp',
+    aggressionLevel: 2,
+    location: 'JP Nagar 6th Phase',
+    ward: 'JP Nagar',
+    distanceKm: 1.2,
+    reportedAt: '2026-01-15T08:42:00',
+    status: 'reported', // reported | in_progress | on_site | resolved
+    photo: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: 'CASE-0198',
+    species: 'Cat',
+    severity: 'medium',
+    injuryType: 'Wound on left paw',
+    aggressionLevel: 1,
+    location: 'Koramangala 4th Block',
+    ward: 'Koramangala',
+    distanceKm: 3.4,
+    reportedAt: '2026-01-15T07:10:00',
+    status: 'reported',
+    photo: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: 'CASE-0195',
+    species: 'Dog',
+    severity: 'low',
+    injuryType: 'Appears malnourished, no visible injury',
+    aggressionLevel: 1,
+    location: 'BTM Layout 1st Stage',
+    ward: 'BTM Layout',
+    distanceKm: 4.8,
+    reportedAt: '2026-01-14T19:20:00',
+    status: 'reported',
+    photo: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=600&auto=format&fit=crop',
+  },
+  {
+    id: 'CASE-0190',
+    species: 'Dog',
+    severity: 'high',
+    injuryType: 'Deep cut on hind leg, bleeding',
+    aggressionLevel: 3,
+    location: 'HSR Layout Sector 1',
+    ward: 'HSR Layout',
+    distanceKm: 2.1,
+    reportedAt: '2026-01-14T14:05:00',
+    status: 'in_progress',
+    claimedAt: '2026-01-14T14:18:00',
+    volunteerName: 'You',
+    photo: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=600&auto=format&fit=crop',
+  },
+]
+
+export function getCaseById(id) {
+  return CASES.find((c) => c.id === id)
+}

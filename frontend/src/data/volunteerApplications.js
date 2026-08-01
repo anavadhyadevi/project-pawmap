@@ -1,0 +1,35 @@
+export const VOLUNTEER_APPLICATIONS = [
+  {
+    id: 'USR-0142',
+    fullName: 'Rahul Menon',
+    email: 'rahul.menon@example.com',
+    phone: '9845012345',
+    appliedAt: '2026-01-14T10:22:00',
+    availability: 'Weekday evenings, weekends',
+    experience: 'Fostered 2 dogs previously',
+    reason: 'Want to help reduce response time for injured strays in my area.',
+    status: 'pending', // pending | approved | rejected
+  },
+  {
+    id: 'USR-0139',
+    fullName: 'Divya Shetty',
+    email: 'divya.shetty@example.com',
+    phone: '9900123456',
+    appliedAt: '2026-01-13T16:05:00',
+    availability: 'Mornings before work',
+    experience: 'No prior experience, but has a car for transport',
+    reason: 'Saw a dog get hit near my house and couldn\u2019t do anything — want to be able to next time.',
+    status: 'pending',
+  },
+  {
+    id: 'USR-0121',
+    fullName: 'Karan Verma',
+    email: 'karan.verma@example.com',
+    phone: '9880011223',
+    appliedAt: '2026-01-10T09:40:00',
+    availability: 'Flexible',
+    experience: 'Veterinary assistant, 1 year',
+    reason: 'Professional background in animal care.',
+    status: 'approved',
+  },
+]

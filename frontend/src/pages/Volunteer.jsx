@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -28,6 +28,17 @@ const EXPECTATIONS = [
 
 export default function Volunteer() {
   const { user, isLoggedIn } = useAuth()
+
+  // NGOs don't apply to volunteer — send them to their own dashboard instead.
+  // NGOs don't apply to volunteer — send them to their own dashboard instead.
+  if (isLoggedIn && user.role === 'NGO_Admin') {
+    return <Navigate to="/ngo/dashboard" replace />
+  }
+  // Already a Volunteer? The status card that used to live on this page
+  // now lives on the Dashboard — send them straight there.
+  if (isLoggedIn && user.role === 'Volunteer') {
+    return <Navigate to="/volunteer/dashboard" replace />
+  }
   const [form, setForm] = useState({ availability: '', experience: '', reason: '' })
   const [submitting, setSubmitting] = useState(false)
   const [applied, setApplied] = useState(false)
@@ -98,6 +109,9 @@ export default function Volunteer() {
                     ? "We've got your application. An NGO partner will review it and you'll get a notification once approved."
                     : 'You have full volunteer access — head to your dashboard to start claiming cases.'}
                 </p>
+                <Link to="/volunteer/dashboard" className="btn-pm btn-pm--orange">
+                  Go to dashboard
+                </Link>
               </div>
             ) : applied ? (
               <div className="pm-vol-apply__card pm-vol-apply__card--status">
