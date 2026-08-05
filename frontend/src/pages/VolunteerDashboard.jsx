@@ -1,12 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { CASES as INITIAL_CASES } from '../data/cases.js'
 import './volunteerDashboard.css'
 
-const SEVERITY_LABEL = { low: 'Low', medium: 'Medium', high: 'High / SOS' }
+const API = 'http://localhost:8000/api'
+
+const SEVERITY_LABEL = { 1: 'Low', 2: 'Low', 3: 'Medium', 4: 'High / SOS', 5: 'High / SOS' }
+const SEVERITY_CLASS  = { 1: 'low', 2: 'low', 3: 'medium', 4: 'high', 5: 'high' }
+
+// map your Django status to sreya's CSS status
+const STATUS_MAP = {
+  'Open':        'reported',
+  'In_Progress': 'in_progress',
+  'Resolved':    'resolved',
+  'Escalated':   'escalated',
+  'Unresolved':  'unresolved',
+}
 
 function timeAgo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -17,58 +28,150 @@ function timeAgo(iso) {
   return `${Math.round(hrs / 24)} day ago`
 }
 
-export default function VolunteerDashboard() {
-  const { user, isLoggedIn } = useAuth()
-  const [cases, setCases] = useState(INITIAL_CASES)
-  const [severityFilter, setSeverityFilter] = useState('all')
+// convert Django case to the shape sreya's UI expects
+function adaptCase(c) {
+  return {
+    id:             c.case_id,
+    species:        c.species,
+    severity:       c.severity,
+    severityLabel:  SEVERITY_LABEL[c.severity] || 'Medium',
+    severityClass:  SEVERITY_CLASS[c.severity] || 'medium',
+    injuryType:     c.injury_type || 'No injury details provided',
+    aggressionLevel: c.aggression_level,
+    location:       c.ward || `${c.latitude}, ${c.longitude}`,
+    ward:           c.ward || 'Unknown',
+    distanceKm:     '—',   // calculate later with real geolocation
+    reportedAt:     c.created_at,
+    status:         STATUS_MAP[c.status] || 'reported',
+    photo:          c.photo
+                      ? c.photo
+                      : 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop',
+    volunteerId:    c.volunteer,
+    volunteerName:  c.volunteer_name,
+  }
+}
 
-  // Guard: only logged-in Volunteers (verified or not) should land here.
-  // Anyone else gets redirected — mirrors what a real protected route needs
-  // once the backend enforces role-based access too.
+export default function VolunteerDashboard() {
+  const { user, accessToken, isLoggedIn } = useAuth()
+  const [cases, setCases]     = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState('')
+  const [severityFilter, setSeverityFilter] = useState('all')
+  const [claiming, setClaiming] = useState(null)
+
+  const fetchCases = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/cases/`, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      })
+      const data = await res.json()
+      // DRF pagination wraps results in { count, results }
+      const results = data.results ?? data
+      setCases(results.map(adaptCase))
+    } catch (err) {
+      setError('Could not load cases. Is the backend running?')
+    } finally {
+      setLoading(false)
+    }
+  }, [accessToken])
+
+  useEffect(() => {
+    fetchCases()
+    // poll every 30 seconds for new cases
+    const interval = setInterval(fetchCases, 30000)
+    return () => clearInterval(interval)
+  }, [fetchCases])
+
   if (!isLoggedIn) return <Navigate to="/login" replace />
-  if (user.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
+  if (user?.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
 
   const feed = useMemo(
     () =>
       cases
         .filter((c) => c.status === 'reported')
-        .filter((c) => severityFilter === 'all' || c.severity === severityFilter)
+        .filter((c) => {
+          if (severityFilter === 'all') return true
+          if (severityFilter === 'high')   return c.severity >= 4
+          if (severityFilter === 'medium') return c.severity === 3
+          if (severityFilter === 'low')    return c.severity <= 2
+          return true
+        })
         .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt)),
     [cases, severityFilter]
   )
 
-  const myCases = cases.filter((c) => c.status !== 'reported' && c.status !== 'resolved')
+  const myCases    = cases.filter((c) => c.status === 'in_progress' && c.volunteerId === user?.id)
   const activeWards = new Set(myCases.map((c) => c.ward))
 
   function canClaim(targetCase) {
     if (myCases.length === 0) return true
-    // Allow claiming another case only if it's in the same ward as an
-    // existing active case — a volunteer already on-site nearby can
-    // reasonably take a second nearby animal, but not one across town.
     return activeWards.has(targetCase.ward)
   }
 
-  function claimCase(id) {
-    // A volunteer can hold multiple active cases only if they're in the
-    // same ward as one they've already claimed — reflects being able to
-    // handle a second nearby animal, but not two cases across town.
-    // Wire this up to POST /api/cases/:id/claim/ once the backend exposes it;
-    // the real endpoint should enforce this same rule server-side (and do
-    // the claim atomically so two volunteers can't grab the same case).
-    const target = cases.find((c) => c.id === id)
+  async function claimCase(caseId) {
+    const target = cases.find((c) => c.id === caseId)
     if (!target || !canClaim(target)) return
-    setCases((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? { ...c, status: 'in_progress', claimedAt: new Date().toISOString(), volunteerName: 'You' }
-          : c
-      )
-    )
+    setClaiming(caseId)
+    try {
+      const res = await fetch(`${API}/cases/${caseId}/claim/`, {
+        method:  'PATCH',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ note: 'On my way!' }),
+      })
+      if (res.ok) {
+        await fetchCases() // refresh the list
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Could not claim case.')
+      }
+    } catch {
+      alert('Could not connect to server.')
+    } finally {
+      setClaiming(null)
+    }
   }
 
-  function updateStatus(id, status) {
-    setCases((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)))
+  async function updateStatus(caseId, newStatus) {
+    // map sreya's status back to Django status
+    const djangoStatus = {
+      'on_site':  'On_Site',
+      'resolved': 'Resolved',
+      'escalated': 'Escalated',
+    }[newStatus]
+
+    if (!djangoStatus) return
+
+    try {
+      const res = await fetch(`${API}/cases/${caseId}/status/`, {
+        method:  'PATCH',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status: djangoStatus }),
+      })
+      if (res.ok) {
+        await fetchCases()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Could not update status.')
+      }
+    } catch {
+      alert('Could not connect to server.')
+    }
   }
+
+  if (loading) return (
+    <div className="pm-vd-page">
+      <Navbar variant="light" />
+      <div style={{ textAlign: 'center', padding: '80px 20px', color: '#6b7280' }}>
+        Loading cases...
+      </div>
+    </div>
+  )
 
   return (
     <div className="pm-vd-page">
@@ -79,23 +182,35 @@ export default function VolunteerDashboard() {
           <div className="pm-vd-hero__row">
             <div>
               <p className="eyebrow pm-vd-hero__eyebrow">Volunteer dashboard</p>
-              <h1 className="pm-vd-hero__title">Hi, {user.full_name.split(' ')[0]} — here's what's nearby.</h1>
+              <h1 className="pm-vd-hero__title">
+                Hi, {user?.full_name?.split(' ')[0]} — here's what's nearby.
+              </h1>
             </div>
-            {user.is_verified && (
+            {user?.is_verified && (
               <div className="pm-vd-reliability">
-                <span className="pm-vd-reliability__value">4.5</span>
+                <span className="pm-vd-reliability__value">—</span>
                 <span className="pm-vd-reliability__label">Reliability score</span>
               </div>
             )}
           </div>
-          {!user.is_verified ? (
+          {!user?.is_verified ? (
             <p className="pm-vd-pending-note">
-              ⏳ Your volunteer application is still pending NGO approval. You can preview the
-              case feed, but claiming will be enabled once you're verified.
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{marginRight: 6, verticalAlign: 'middle'}}>
+                <circle cx="8" cy="8" r="8" fill="#f59e0b"/>
+                <path d="M8 4.5V8.5M8 10.5V11" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              Your volunteer application is pending NGO approval. You can preview cases but claiming is locked.
             </p>
           ) : (
-            <p className="pm-vd-verified-note">✅ You're a verified volunteer — full access unlocked.</p>
+            <p className="pm-vd-verified-note">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{marginRight: 6, verticalAlign: 'middle'}}>
+                <circle cx="8" cy="8" r="8" fill="#16a34a"/>
+                <path d="M4.5 8L7 10.5L11.5 6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              You're a verified volunteer — full access unlocked.
+            </p>
           )}
+          {error && <p style={{ color: '#dc2626', marginTop: 8 }}>{error}</p>}
         </div>
       </section>
 
@@ -109,37 +224,36 @@ export default function VolunteerDashboard() {
                 <article key={c.id} className="pm-vd-card pm-vd-card--mine">
                   <div className="pm-vd-card__photo">
                     <img src={c.photo} alt={c.species} />
-                    <span className={`pm-vd-badge pm-vd-badge--${c.severity}`}>{SEVERITY_LABEL[c.severity]}</span>
+                    <span className={`pm-vd-badge pm-vd-badge--${c.severityClass}`}>
+                      {c.severityLabel}
+                    </span>
                   </div>
                   <div className="pm-vd-card__body">
                     <div className="pm-vd-card__row">
                       <h3>{c.species} · {c.id}</h3>
                       <span className="pm-vd-status">{c.status.replace('_', ' ')}</span>
                     </div>
-                    <p className="pm-vd-card__meta">📍 {c.location} · {c.distanceKm} km away</p>
+                    <p className="pm-vd-card__meta">📍 {c.location}</p>
                     <p className="pm-vd-card__injury">{c.injuryType}</p>
-
                     <div className="pm-vd-card__actions">
                       {c.status === 'in_progress' && (
-                        <button
-                          type="button"
+                        <button type="button"
                           className="btn-pm btn-pm--outline-light btn-pm--full"
-                          onClick={() => updateStatus(c.id, 'on_site')}
-                        >
+                          onClick={() => updateStatus(c.id, 'on_site')}>
                           Mark as On Site
                         </button>
                       )}
                       {c.status === 'on_site' && (
-                        <button
-                          type="button"
+                        <button type="button"
                           className="btn-pm btn-pm--orange btn-pm--full"
-                          onClick={() => updateStatus(c.id, 'resolved')}
-                        >
+                          onClick={() => updateStatus(c.id, 'resolved')}>
                           Mark Resolved
                         </button>
                       )}
-                      {c.severity === 'high' && c.status !== 'resolved' && (
-                        <button type="button" className="pm-vd-sos">
+                      {c.severity >= 4 && c.status !== 'resolved' && (
+                        <button type="button"
+                          className="pm-vd-sos"
+                          onClick={() => updateStatus(c.id, 'escalated')}>
                           🚨 Escalate to SOS
                         </button>
                       )}
@@ -155,27 +269,19 @@ export default function VolunteerDashboard() {
       {/* CASE FEED */}
       <section className="pm-vd-feed">
         <div className="container-pm">
-          {myCases.length > 0 && (
-            <p className="pm-vd-locked-note">
-              You have an active case in {[...activeWards].join(', ')} — you can claim more nearby, but other areas are locked until you resolve it.
-            </p>
-          )}
           <p className="pm-vd-atomic-note">
-            🔒 Claims are processed atomically — the first volunteer to hit "Claim" locks the
-            case immediately, so two people can't respond to the same animal.
+            🔒 Claims are atomic — the first volunteer to hit "Claim" locks the case immediately.
           </p>
-
           <div className="pm-vd-feed__head">
-            <h2 className="pm-vd-section-title">Reported near you</h2>
+            <h2 className="pm-vd-section-title">
+              Reported near you ({feed.length} open)
+            </h2>
             <div className="pm-chip-row">
               {['all', 'high', 'medium', 'low'].map((s) => (
-                <button
-                  key={s}
-                  type="button"
+                <button key={s} type="button"
                   className={`pm-chip ${severityFilter === s ? 'pm-chip--active' : ''}`}
-                  onClick={() => setSeverityFilter(s)}
-                >
-                  {s === 'all' ? 'All' : SEVERITY_LABEL[s]}
+                  onClick={() => setSeverityFilter(s)}>
+                  {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
             </div>
@@ -190,30 +296,28 @@ export default function VolunteerDashboard() {
               {feed.map((c) => (
                 <article key={c.id} className="pm-vd-card">
                   <div className="pm-vd-card__photo">
-                    <img src={c.photo} alt={c.species} />
-                    <span className={`pm-vd-badge pm-vd-badge--${c.severity}`}>{SEVERITY_LABEL[c.severity]}</span>
+                    <img src={c.photo} alt={c.species}
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop'
+                      }}/>
+                    <span className={`pm-vd-badge pm-vd-badge--${c.severityClass}`}>
+                      {c.severityLabel}
+                    </span>
                   </div>
                   <div className="pm-vd-card__body">
                     <div className="pm-vd-card__row">
                       <h3>{c.species} · {c.id}</h3>
                       <span className="pm-vd-time">{timeAgo(c.reportedAt)}</span>
                     </div>
-                    <p className="pm-vd-card__meta">📍 {c.location} · {c.distanceKm} km away</p>
+                    <p className="pm-vd-card__meta">📍 {c.location}</p>
                     <p className="pm-vd-card__injury">{c.injuryType}</p>
-                    <button
-                      type="button"
+                    <button type="button"
                       className="btn-pm btn-pm--orange btn-pm--full"
-                      disabled={!user.is_verified || !canClaim(c)}
-                      onClick={() => claimCase(c.id)}
-                      title={
-                        !user.is_verified
-                          ? 'Available once your application is approved'
-                          : !canClaim(c)
-                          ? 'Only cases in the same area as your active case can be claimed'
-                          : undefined
-                      }
-                    >
-                      {!user.is_verified
+                      disabled={!user?.is_verified || !canClaim(c) || claiming === c.id}
+                      onClick={() => claimCase(c.id)}>
+                      {claiming === c.id
+                        ? 'Claiming...'
+                        : !user?.is_verified
                         ? 'Claim (pending approval)'
                         : !canClaim(c)
                         ? 'Different area — resolve current first'

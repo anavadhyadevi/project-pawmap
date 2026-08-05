@@ -32,6 +32,7 @@ class Case(models.Model):
     STATUS_CHOICES = [
         ('Open',        'Open'),
         ('In_Progress', 'In Progress'),
+        ('On_Site',      'On Site'),
         ('Resolved',    'Resolved'),
         ('Escalated',   'Escalated'),
         ('Unresolved',  'Unresolved'),
