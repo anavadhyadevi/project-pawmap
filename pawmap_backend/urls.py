@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/cases/', include('cases.urls')),
     path('api/animals/', include('animals.urls')),
     path('api/medical/', include('medical.urls')), 
+    path('api/adoption/', include('adoption.urls')),
 ]
 
 if settings.DEBUG:
