@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/cases/', include('cases.urls')),
     path('api/animals/', include('animals.urls')),
+    path('api/medical/', include('medical.urls')), 
 ]
 
 if settings.DEBUG:
