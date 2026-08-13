@@ -153,3 +153,95 @@ class CaseStatusLog(models.Model):
     class Meta:
         db_table  = 'case_status_logs'
         ordering  = ['changed_at']
+
+
+class LostPetReport(models.Model):
+    STATUS_CHOICES = [
+        ('Active',   'Active'),
+        ('Matched',  'Matched'),
+        ('Closed',   'Closed'),
+    ]
+
+    lost_report_id          = models.CharField(max_length=20, unique=True, editable=False)
+    owner                   = models.ForeignKey(
+                                settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE,
+                                related_name='lost_reports'
+                              )
+    pet_name                = models.CharField(max_length=100)
+    species                 = models.CharField(max_length=50)
+    breed                   = models.CharField(max_length=100, blank=True, default='Unknown')
+    photo                   = models.ImageField(upload_to='lost_photos/', null=True, blank=True)
+    last_seen_location      = models.CharField(max_length=200)
+    last_seen_date          = models.DateField()
+    distinguishing_features = models.TextField(blank=True, default='')
+    collar_tag              = models.CharField(max_length=100, blank=True, default='')
+    microchip_id            = models.CharField(max_length=100, blank=True, default='')
+    reward                  = models.CharField(max_length=100, blank=True, default='')
+    status                  = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
+    created_at              = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.lost_report_id:
+            last = LostPetReport.objects.order_by('-created_at').first()
+            if last and last.lost_report_id:
+                num = int(last.lost_report_id.split('-')[1]) + 1
+            else:
+                num = 1
+            self.lost_report_id = f'LOST-{num:04d}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.lost_report_id} — {self.pet_name} ({self.species})'
+
+    class Meta:
+        db_table = 'lost_pet_reports'
+        ordering = ['-created_at']
+
+
+class FoundPetReport(models.Model):
+    STATUS_CHOICES = [
+        ('Active',  'Active'),
+        ('Matched', 'Matched'),
+        ('Closed',  'Closed'),
+    ]
+
+    found_report_id         = models.CharField(max_length=20, unique=True, editable=False)
+    reporter                = models.ForeignKey(
+                                settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE,
+                                related_name='found_reports'
+                              )
+    species                 = models.CharField(max_length=50)
+    breed                   = models.CharField(max_length=100, blank=True, default='Unknown')
+    photo                   = models.ImageField(upload_to='found_photos/', null=True, blank=True)
+    found_location          = models.CharField(max_length=200)
+    found_date              = models.DateField()
+    ownership_signs         = models.TextField(blank=True, default='')
+    current_custody         = models.CharField(max_length=200, blank=True, default='')
+    distinguishing_features = models.TextField(blank=True, default='')
+    linked_animal           = models.ForeignKey(
+                                'animals.Animal',
+                                on_delete=models.SET_NULL,
+                                null=True, blank=True,
+                                related_name='found_reports'
+                              )
+    status                  = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
+    created_at              = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.found_report_id:
+            last = FoundPetReport.objects.order_by('-created_at').first()
+            if last and last.found_report_id:
+                num = int(last.found_report_id.split('-')[1]) + 1
+            else:
+                num = 1
+            self.found_report_id = f'FOUND-{num:04d}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.found_report_id} — {self.species}'
+
+    class Meta:
+        db_table = 'found_pet_reports'
+        ordering = ['-created_at']
