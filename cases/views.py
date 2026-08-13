@@ -3,10 +3,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
 from django.utils import timezone
-from .models import Case, CaseStatusLog
+
+from .models import Case, CaseStatusLog, LostPetReport, FoundPetReport
 from .serializers import (
     CaseSerializer, CaseCreateSerializer,
-    ClaimCaseSerializer, UpdateStatusSerializer
+    ClaimCaseSerializer, UpdateStatusSerializer,
+    LostPetReportSerializer, LostPetReportCreateSerializer,
+    FoundPetReportSerializer, FoundPetReportCreateSerializer
 )
 
 
@@ -187,4 +190,61 @@ class UpdateCaseStatusView(APIView):
         return Response(
             CaseSerializer(case).data,
             status=status.HTTP_200_OK
+        )
+
+
+
+class LostPetReportListCreateView(generics.ListCreateAPIView):
+    """
+    GET  /api/cases/lost/   — list all lost pet reports
+    POST /api/cases/lost/   — submit a lost pet report
+    """
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return LostPetReportCreateSerializer
+        return LostPetReportSerializer
+
+    def get_queryset(self):
+        return LostPetReport.objects.filter(status='Active')
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        report = serializer.save(owner=request.user)
+        return Response(
+            LostPetReportSerializer(report).data,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class FoundPetReportListCreateView(generics.ListCreateAPIView):
+    """
+    GET  /api/cases/found/  — list all found pet reports
+    POST /api/cases/found/  — submit a found pet report
+    """
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return FoundPetReportCreateSerializer
+        return FoundPetReportSerializer
+
+    def get_queryset(self):
+        return FoundPetReport.objects.filter(status='Active')
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        report = serializer.save(reporter=request.user)
+        return Response(
+            FoundPetReportSerializer(report).data,
+            status=status.HTTP_201_CREATED
         )

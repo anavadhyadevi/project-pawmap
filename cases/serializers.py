@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Case, CaseStatusLog, Ward, AnimalType
+from .models import Case, CaseStatusLog, Ward, AnimalType, LostPetReport, FoundPetReport
 
 
 class WardSerializer(serializers.ModelSerializer):
@@ -96,3 +96,58 @@ class UpdateStatusSerializer(serializers.Serializer):
     ]
     status = serializers.ChoiceField(choices=STATUS_CHOICES)
     note   = serializers.CharField(max_length=500, required=False, default='')
+
+
+
+class LostPetReportSerializer(serializers.ModelSerializer):
+    owner_name = serializers.CharField(source='owner.full_name', read_only=True)
+    owner_phone = serializers.CharField(source='owner.phone', read_only=True)
+
+    class Meta:
+        model  = LostPetReport
+        fields = [
+            'lost_report_id', 'owner', 'owner_name', 'owner_phone',
+            'pet_name', 'species', 'breed', 'photo',
+            'last_seen_location', 'last_seen_date',
+            'distinguishing_features', 'collar_tag',
+            'microchip_id', 'reward', 'status', 'created_at'
+        ]
+        read_only_fields = ['lost_report_id', 'owner', 'created_at']
+
+
+class LostPetReportCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = LostPetReport
+        fields = [
+            'pet_name', 'species', 'breed', 'photo',
+            'last_seen_location', 'last_seen_date',
+            'distinguishing_features', 'collar_tag',
+            'microchip_id', 'reward'
+        ]
+
+
+class FoundPetReportSerializer(serializers.ModelSerializer):
+    reporter_name  = serializers.CharField(source='reporter.full_name', read_only=True)
+    reporter_phone = serializers.CharField(source='reporter.phone', read_only=True)
+
+    class Meta:
+        model  = FoundPetReport
+        fields = [
+            'found_report_id', 'reporter', 'reporter_name', 'reporter_phone',
+            'species', 'breed', 'photo',
+            'found_location', 'found_date',
+            'ownership_signs', 'current_custody',
+            'distinguishing_features', 'status', 'created_at'
+        ]
+        read_only_fields = ['found_report_id', 'reporter', 'created_at']
+
+
+class FoundPetReportCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = FoundPetReport
+        fields = [
+            'species', 'breed', 'photo',
+            'found_location', 'found_date',
+            'ownership_signs', 'current_custody',
+            'distinguishing_features'
+        ]
