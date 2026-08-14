@@ -245,3 +245,13 @@ class FoundPetReport(models.Model):
     class Meta:
         db_table = 'found_pet_reports'
         ordering = ['-created_at']
+
+class CaseNotification(models.Model):
+    case         = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='notifications')
+    volunteer    = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='case_notifications')
+    notified_at  = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'case_notifications'
+        unique_together = ('case', 'volunteer')

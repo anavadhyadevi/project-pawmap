@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
+import { API_BASE_URL } from '../lib/api.js'
 import './reportLostFound.css'
 import './report.css'
 
@@ -8,6 +10,7 @@ const SPECIES = ['Dog', 'Cat', 'Bird', 'Other']
 
 export default function ReportLostFound() {
   const navigate = useNavigate()
+  const { accessToken, isLoggedIn } = useAuth()
   const [type, setType] = useState('lost') // 'lost' | 'found'
   const [form, setForm] = useState({
     petName: '',
@@ -51,16 +54,45 @@ export default function ReportLostFound() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!validate()) return
+
+    if (!isLoggedIn) {
+      navigate('/login')
+      return
+    }
+
     setSubmitting(true)
     try {
-      // Wire this up to POST /api/lost-found/ once the backend exposes it.
-      // const body = new FormData()
-      // body.append('type', type)
-      // Object.entries(form).forEach(([k, v]) => body.append(k, v))
-      // if (photo) body.append('photo', photo)
-      // await fetch('/api/lost-found/', { method: 'POST', body })
-      await new Promise((r) => setTimeout(r, 700))
+      const endpoint = type === 'lost' ? '/cases/lost/' : '/cases/found/'
+
+      const body = new FormData()
+      if (type === 'lost') {
+        body.append('pet_name', form.petName)
+        body.append('last_seen_location', form.location)
+        body.append('last_seen_date', form.date)
+        body.append('microchip_id', form.microchipId)
+      } else {
+        body.append('found_location', form.location)
+        body.append('found_date', form.date)
+      }
+      body.append('species', form.species)
+      body.append('breed', form.breed)
+      body.append('distinguishing_features', form.features)
+      if (photo) body.append('photo', photo)
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        throw new Error(data?.error || 'Request failed')
+      }
+
       setSubmitted(true)
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, submit: err.message }))
     } finally {
       setSubmitting(false)
     }
@@ -237,6 +269,7 @@ export default function ReportLostFound() {
               </div>
             </div>
 
+            {errors.submit && <p className="pm-field__error">{errors.submit}</p>}
             <button type="submit" className="btn-pm btn-pm--orange btn-pm--full" disabled={submitting}>
               {submitting ? 'Submitting…' : 'Submit report'}
             </button>

@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import User
 from .serializers import RegisterSerializer, UserProfileSerializer, LoginSerializer
+from pawmap_backend.geo import redis_client
 
 
 class RegisterView(generics.CreateAPIView):
@@ -65,3 +66,25 @@ class MeView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class LocationPingView(APIView):
+    """
+    POST /api/users/location/ — volunteer pings current location.
+    Stored in Redis only, expires in 5 min if pings stop.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'Volunteer':
+            return Response({'error': 'Only volunteers can ping location.'}, status=status.HTTP_403_FORBIDDEN)
+
+        lat = request.data.get('latitude')
+        lon = request.data.get('longitude')
+        if lat is None or lon is None:
+            return Response({'error': 'latitude and longitude are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        key = f'volunteer_location:{request.user.pk}'
+        redis_client.set(key, f'{lat},{lon}', ex=300)
+
+        return Response({'status': 'location updated'}, status=status.HTTP_200_OK)
