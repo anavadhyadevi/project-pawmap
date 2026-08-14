@@ -26,7 +26,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Animal
         fields = [
-            'animal_id', 'species', 'breed', 'estimated_age',
+            'animal_id', 'name', 'species', 'breed', 'estimated_age',
             'distinguishing_features', 'photo',
             'temperament_score', 'adoption_status', 'ownership_status',
             'case_id', 'current_foster', 'current_foster_name',
@@ -40,7 +40,7 @@ class AnimalCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Animal
         fields = [
-            'species', 'breed', 'estimated_age',
+            'name', 'species', 'breed', 'estimated_age',
             'distinguishing_features', 'photo',
             'ownership_status', 'case',
         ]

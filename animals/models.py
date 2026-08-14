@@ -25,6 +25,7 @@ class Animal(models.Model):
     # ── type ─────────────────────────────────────────────────
     species = models.CharField(max_length=50)
     breed   = models.CharField(max_length=100, blank=True, default='Unknown')
+    name    = models.CharField(max_length=100, blank=True, default='')
 
     # ── details ───────────────────────────────────────────────
     estimated_age           = models.CharField(max_length=50, blank=True, default='')
