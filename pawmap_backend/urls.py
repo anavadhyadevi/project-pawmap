@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/medical/', include('medical.urls')), 
     path('api/adoption/', include('adoption.urls')),
     path('api/analytics/', include('analytics.urls')),
+    path('api/volunteers/', include('volunteers.urls')),
 ]
 
 if settings.DEBUG:
