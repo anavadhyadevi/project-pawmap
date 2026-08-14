@@ -1,12 +1,11 @@
-from rest_framework import generics, status, permissions
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from pawmap_backend.geo import redis_client
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import generics, status, permissions
 from django.contrib.auth import authenticate
 from .models import User
 from .serializers import RegisterSerializer, UserProfileSerializer, LoginSerializer
-from pawmap_backend.geo import redis_client
-
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -88,3 +87,39 @@ class LocationPingView(APIView):
         redis_client.set(key, f'{lat},{lon}', ex=300)
 
         return Response({'status': 'location updated'}, status=status.HTTP_200_OK)
+
+class VolunteerListView(generics.ListAPIView):
+    """
+    GET /api/users/volunteers/ — list all volunteers (NGO Admin only)
+    """
+    serializer_class   = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return User.objects.filter(role='Volunteer')
+
+class VerifyVolunteerView(APIView):
+    """
+    PATCH /api/users/{id}/verify/ — NGO Admin verifies a volunteer
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        if request.user.role not in ['NGO_Admin', 'Platform_Admin']:
+            return Response(
+                {'error': 'Only NGO Admins can verify volunteers.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        try:
+            volunteer = User.objects.get(pk=pk, role='Volunteer')
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Volunteer not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        volunteer.is_verified = True
+        volunteer.save()
+        return Response(
+            UserProfileSerializer(volunteer).data,
+            status=status.HTTP_200_OK
+        )
