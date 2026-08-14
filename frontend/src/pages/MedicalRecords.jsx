@@ -1,47 +1,91 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { MEDICAL_ANIMALS } from '../data/medicalRecords.js'
+import { API_BASE_URL } from '../lib/api.js'
 import './medicalRecords.css'
 
-const RECORD_TYPES = ['Vaccination', 'Treatment', 'Diagnosis']
+const RECORD_TYPES = [
+  { value: 'vaccination',   label: 'Vaccination' },
+  { value: 'treatment',     label: 'Treatment' },
+  { value: 'diagnosis',     label: 'Diagnosis' },
+  { value: 'deworming',     label: 'Deworming' },
+  { value: 'sterilisation', label: 'Sterilisation' },
+  { value: 'weight',        label: 'Weight Check' },
+  { value: 'other',         label: 'Other' },
+]
 
 export default function MedicalRecords() {
-  const { user, isLoggedIn } = useAuth()
+  const { user, accessToken, isLoggedIn } = useAuth()
 
-  // Volunteers and NGO admins can view/log records. Reporters can't —
-  // this isn't public data, and there's no Vet signup path in the UI yet
-  // (the role exists on the backend, but we haven't built that flow).
+  const [animals, setAnimals] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [expandedId, setExpandedId] = useState(null)
+  const [form, setForm] = useState({ type: 'vaccination', detail: '' })
+  const [submitting, setSubmitting] = useState(false)
+
+  const fetchAnimals = useCallback(async () => {
+    if (!accessToken) return
+    try {
+      const res = await fetch(`${API_BASE_URL}/animals/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      const data = await res.json()
+      setAnimals(data.results ?? data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [accessToken])
+
+  useEffect(() => { fetchAnimals() }, [fetchAnimals])
+
   if (!isLoggedIn) return <Navigate to="/login" replace />
   if (!['Volunteer', 'NGO_Admin'].includes(user.role)) return <Navigate to="/" replace />
 
-  const [animals, setAnimals] = useState(MEDICAL_ANIMALS)
-  const [search, setSearch] = useState('')
-  const [expandedId, setExpandedId] = useState(null)
-  const [form, setForm] = useState({ type: 'Vaccination', detail: '' })
-
-  const filtered = useMemo(
-    () => animals.filter((a) => a.name.toLowerCase().includes(search.trim().toLowerCase())),
-    [animals, search]
+  const filtered = animals.filter((a) =>
+    (a.name || a.species).toLowerCase().includes(search.trim().toLowerCase())
   )
 
-  function addRecord(animalId) {
+  async function addRecord(animalId) {
     if (!form.detail.trim()) return
-    // Wire this up to POST /api/medical/records/ once the backend exposes
-    // it — the `medical` app currently has models.py only, no API yet.
-    const newRecord = {
-      id: `MR-${Math.floor(Math.random() * 9000 + 1000)}`,
-      date: new Date().toISOString().slice(0, 10),
-      type: form.type,
-      detail: form.detail,
-      vetName: user.full_name,
+    setSubmitting(true)
+    try {
+      const res = await fetch(`${API_BASE_URL}/medical/records/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          animal: animalId,
+          entry_type: form.type,
+          details: form.detail,
+        }),
+      })
+      if (res.ok) {
+        await fetchAnimals()
+        setForm({ type: 'vaccination', detail: '' })
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSubmitting(false)
     }
-    setAnimals((prev) =>
-      prev.map((a) => (a.animalId === animalId ? { ...a, records: [newRecord, ...a.records] } : a))
+  }
+
+  if (loading) {
+    return (
+      <div className="pm-mr-page">
+        <Navbar variant="light" />
+        <div style={{ textAlign: 'center', padding: '80px', color: '#6b7280' }}>
+          Loading medical records...
+        </div>
+      </div>
     )
-    setForm({ type: 'Vaccination', detail: '' })
   }
 
   return (
@@ -74,61 +118,40 @@ export default function MedicalRecords() {
           ) : (
             <div className="pm-mr-cards">
               {filtered.map((a) => (
-                <article key={a.animalId} className="pm-mr-card">
+                <article key={a.animal_id} className="pm-mr-card">
                   <button
                     type="button"
                     className="pm-mr-card__summary"
-                    onClick={() => setExpandedId(expandedId === a.animalId ? null : a.animalId)}
+                    onClick={() => setExpandedId(expandedId === a.animal_id ? null : a.animal_id)}
                   >
-                    <img src={a.photo} alt={a.name} className="pm-mr-card__photo" />
+                    {a.photo ? (
+                      <img src={a.photo} alt={a.name || a.species} className="pm-mr-card__photo" />
+                    ) : (
+                      <div className="pm-mr-card__photo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e5e7eb', fontSize: 24 }}>
+                        🐾
+                      </div>
+                    )}
                     <div className="pm-mr-card__info">
-                      <h3>{a.name}</h3>
-                      <p>{a.species} · {a.animalId} · {a.records.length} record{a.records.length !== 1 ? 's' : ''}</p>
+                      <h3>{a.name || `Unnamed ${a.species}`}</h3>
+                      <p>
+                        {a.species} · {a.animal_id} ·{' '}
+                        {a.temperament_ratings ? '' : ''}
+                        {(a.medical_records_count ?? a.records?.length ?? 0)} record
+                        {(a.medical_records_count ?? a.records?.length ?? 0) !== 1 ? 's' : ''}
+                      </p>
                     </div>
-                    <span className="pm-mr-card__chevron">{expandedId === a.animalId ? '−' : '+'}</span>
+                    <span className="pm-mr-card__chevron">{expandedId === a.animal_id ? '−' : '+'}</span>
                   </button>
 
-                  {expandedId === a.animalId && (
-                    <div className="pm-mr-card__details">
-                      <ul className="pm-mr-timeline">
-                        {a.records.map((r) => (
-                          <li key={r.id} className="pm-mr-timeline__item">
-                            <span className={`pm-mr-type pm-mr-type--${r.type.toLowerCase()}`}>{r.type}</span>
-                            <div>
-                              <p className="pm-mr-timeline__detail">{r.detail}</p>
-                              <p className="pm-mr-timeline__meta">{r.date} · {r.vetName}</p>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="pm-mr-add">
-                        <h4>Log a new record</h4>
-                        <div className="pm-mr-add__row">
-                          <select
-                            value={form.type}
-                            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                          >
-                            {RECORD_TYPES.map((t) => (
-                              <option key={t} value={t}>{t}</option>
-                            ))}
-                          </select>
-                          <input
-                            type="text"
-                            placeholder="e.g. Rabies booster administered"
-                            value={form.detail}
-                            onChange={(e) => setForm((f) => ({ ...f, detail: e.target.value }))}
-                          />
-                          <button
-                            type="button"
-                            className="btn-pm btn-pm--orange"
-                            onClick={() => addRecord(a.animalId)}
-                          >
-                            Add
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                  {expandedId === a.animal_id && (
+                    <AnimalMedicalDetail
+                      animal={a}
+                      accessToken={accessToken}
+                      form={form}
+                      setForm={setForm}
+                      submitting={submitting}
+                      onAdd={() => addRecord(a.animal_id)}
+                    />
                   )}
                 </article>
               ))}
@@ -138,6 +161,89 @@ export default function MedicalRecords() {
       </section>
 
       <Footer />
+    </div>
+  )
+}
+
+function AnimalMedicalDetail({ animal, accessToken, form, setForm, submitting, onAdd }) {
+  const [records, setRecords] = useState([])
+  const [loadingRecords, setLoadingRecords] = useState(true)
+
+  const fetchRecords = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/medical/records/?animal=${animal.animal_id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+      const data = await res.json()
+      setRecords(data.results ?? data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingRecords(false)
+    }
+  }, [animal.animal_id, accessToken])
+
+  useEffect(() => { fetchRecords() }, [fetchRecords])
+
+  async function handleAdd() {
+    await onAdd()
+    fetchRecords()
+  }
+
+  return (
+    <div className="pm-mr-card__details">
+      {loadingRecords ? (
+        <p style={{ color: '#6b7280', fontSize: 13 }}>Loading records…</p>
+      ) : (
+        <ul className="pm-mr-timeline">
+          {records.length === 0 ? (
+            <p style={{ color: '#6b7280', fontSize: 13 }}>No records yet.</p>
+          ) : (
+            records.map((r) => (
+              <li key={r.record_id} className="pm-mr-timeline__item">
+                <span className={`pm-mr-type pm-mr-type--${r.entry_type}`}>
+                  {r.entry_type.charAt(0).toUpperCase() + r.entry_type.slice(1)}
+                </span>
+                <div>
+                  <p className="pm-mr-timeline__detail">{r.details}</p>
+                  <p className="pm-mr-timeline__meta">
+                    {new Date(r.timestamp).toLocaleDateString()} · {r.vet_name || 'Unknown'}
+                  </p>
+                </div>
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+
+      <div className="pm-mr-add">
+        <h4>Log a new record</h4>
+        <div className="pm-mr-add__row">
+          <select
+            value={form.type}
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+          >
+            {RECORD_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="e.g. Rabies booster administered"
+            value={form.detail}
+            onChange={(e) => setForm((f) => ({ ...f, detail: e.target.value }))}
+          />
+          <button
+            type="button"
+            className="btn-pm btn-pm--orange"
+            disabled={submitting}
+            onClick={handleAdd}
+          >
+            {submitting ? 'Adding…' : 'Add'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,17 +1,46 @@
+import { useEffect, useState, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getVolunteerStats } from '../data/volunteerStats.js'
+import { API_BASE_URL } from '../lib/api.js'
 import './volunteerAnalytics.css'
 
 export default function VolunteerAnalytics() {
-  const { user, isLoggedIn } = useAuth()
+  const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
 
+  const fetchStats = useCallback(async () => {
+    if (!accessToken) return
+    try {
+      const res = await fetch(`${API_BASE_URL}/volunteers/my-analytics/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      setStats(await res.json())
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [accessToken])
+
+  useEffect(() => { fetchStats() }, [fetchStats])
+
+  if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
-  if (user.role !== 'Volunteer') return <Navigate to="/analytics" replace />
-
-  const stats = getVolunteerStats(user.full_name)
+  if (user.role !== 'NGO_Admin') return <Navigate to="/analytics" replace />
+  
+  if (loading || !stats) {
+    return (
+      <div className="pm-va-page">
+        <Navbar variant="light" />
+        <div style={{ textAlign: 'center', padding: '80px', color: '#6b7280' }}>
+          Loading your analytics...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="pm-va-page">
@@ -60,28 +89,32 @@ export default function VolunteerAnalytics() {
 
           <div className="pm-chart-card">
             <h3>Recent cases</h3>
-            <table className="pm-va-table">
-              <thead>
-                <tr>
-                  <th>Case</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentCases.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.species} · {c.id}</td>
-                    <td>{c.location}</td>
-                    <td>
-                      <span className={`pm-va-status pm-va-status--${c.status.toLowerCase().replace(' ', '-')}`}>
-                        {c.status}
-                      </span>
-                    </td>
+            {stats.recentCases.length === 0 ? (
+              <p style={{ color: '#6b7280', fontSize: 13 }}>No cases claimed yet.</p>
+            ) : (
+              <table className="pm-va-table">
+                <thead>
+                  <tr>
+                    <th>Case</th>
+                    <th>Location</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.recentCases.map((c) => (
+                    <tr key={c.id}>
+                      <td>{c.species} · {c.id}</td>
+                      <td>{c.location}</td>
+                      <td>
+                        <span className={`pm-va-status pm-va-status--${c.status.toLowerCase().replace(' ', '-')}`}>
+                          {c.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </section>
