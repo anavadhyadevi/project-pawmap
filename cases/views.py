@@ -4,13 +4,14 @@ from rest_framework.views import APIView
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Case, CaseStatusLog, LostPetReport, FoundPetReport
+from .models import Case, CaseStatusLog, CaseNotification, LostPetReport, FoundPetReport
 from .serializers import (
     CaseSerializer, CaseCreateSerializer,
     ClaimCaseSerializer, UpdateStatusSerializer,
     LostPetReportSerializer, LostPetReportCreateSerializer,
     FoundPetReportSerializer, FoundPetReportCreateSerializer
 )
+from pawmap_backend.geo import get_nearby_volunteer_ids
 
 
 class CaseListCreateView(generics.ListCreateAPIView):
@@ -32,11 +33,9 @@ class CaseListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = Case.objects.all()
-        # filter by status if provided e.g. ?status=Open
         status_filter = self.request.query_params.get('status')
         if status_filter:
             qs = qs.filter(status=status_filter)
-        # filter by species e.g. ?species=Dog
         species = self.request.query_params.get('species')
         if species:
             qs = qs.filter(species__iexact=species)
@@ -54,6 +53,11 @@ class CaseListCreateView(generics.ListCreateAPIView):
             new_status='Open',
             note='Case created'
         )
+
+        nearby_ids = get_nearby_volunteer_ids(case.latitude, case.longitude)
+        for volunteer_id in nearby_ids:
+            CaseNotification.objects.create(case=case, volunteer_id=volunteer_id)
+
         return case
 
     def create(self, request, *args, **kwargs):
@@ -99,8 +103,6 @@ class ClaimCaseView(APIView):
         serializer.is_valid(raise_exception=True)
 
         try:
-            # select_for_update locks the row so no two volunteers
-            # can claim the same case at the same time
             with transaction.atomic():
                 case = Case.objects.select_for_update().get(case_id=case_id)
 
@@ -118,7 +120,6 @@ class ClaimCaseView(APIView):
 
                 old_status = case.status
 
-                # calculate response time in minutes
                 now = timezone.now()
                 response_time = (now - case.created_at).total_seconds() / 60
 
@@ -126,6 +127,10 @@ class ClaimCaseView(APIView):
                 case.status           = 'In_Progress'
                 case.response_time_min = round(response_time, 1)
                 case.save()
+
+                CaseNotification.objects.filter(
+                    case=case, volunteer=request.user
+                ).update(responded_at=timezone.now())
 
                 CaseStatusLog.objects.create(
                     case=case,
@@ -165,7 +170,6 @@ class UpdateCaseStatusView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # only the assigned volunteer or an admin can update status
         if case.volunteer != request.user and request.user.role not in ['NGO_Admin', 'Platform_Admin']:
             return Response(
                 {'error': 'You are not assigned to this case.'},
@@ -191,7 +195,6 @@ class UpdateCaseStatusView(APIView):
             CaseSerializer(case).data,
             status=status.HTTP_200_OK
         )
-
 
 
 class LostPetReportListCreateView(generics.ListCreateAPIView):
