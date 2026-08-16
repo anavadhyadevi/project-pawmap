@@ -1,28 +1,66 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import L from 'leaflet'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { API_BASE_URL } from '../lib/api.js'
+import { reverseGeocode } from '../lib/geocode.js'
 import './reportLostFound.css'
 import './report.css'
 
+// Fix leaflet icon loading issue in Vite
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+})
+L.Marker.prototype.options.icon = DefaultIcon
+
 const SPECIES = ['Dog', 'Cat', 'Bird', 'Other']
+
+function LocationMarker({ position, setPosition, onSetCoords }) {
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng)
+      onSetCoords(e.latlng)
+    },
+  })
+  return position === null ? null : <Marker position={position} />
+}
+
+function ChangeMapView({ center }) {
+  const map = useMap()
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom())
+    }
+  }, [center, map])
+  return null
+}
 
 export default function ReportLostFound() {
   const navigate = useNavigate()
   const { accessToken, isLoggedIn } = useAuth()
   const [type, setType] = useState('lost') // 'lost' | 'found'
+  
   const [form, setForm] = useState({
     petName: '',
     species: 'Dog',
     breed: '',
     date: '',
-    location: '',
+    location: '', // Stores coordinates as "place_name (lat, lon)"
     features: '',
     microchipId: '',
     contactName: '',
     contactPhone: '',
   })
+  const [latLng, setLatLng] = useState(null)
+  const [placeName, setPlaceName] = useState('')
+  const [mapCenter, setMapCenter] = useState([12.9716, 77.5946])
   const [photo, setPhoto] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
   const [errors, setErrors] = useState({})
@@ -43,12 +81,19 @@ export default function ReportLostFound() {
   function validate() {
     const next = {}
     if (type === 'lost' && !form.petName.trim()) next.petName = "Enter your pet's name."
-    if (!form.location.trim()) next.location = 'Add a location.'
+    if (!latLng) next.location = 'Please tap on the map to specify the location.'
     if (!form.date) next.date = type === 'lost' ? 'When did you last see them?' : 'When did you find them?'
     if (!form.contactName.trim()) next.contactName = 'Enter your name.'
     if (!/^\d{10}$/.test(form.contactPhone.replace(/\D/g, ''))) next.contactPhone = 'Enter a 10-digit phone number.'
     setErrors(next)
     return Object.keys(next).length === 0
+  }
+
+  async function handleSetLatLng(coords) {
+    setLatLng(coords)
+    const name = await reverseGeocode(coords.lat, coords.lng)
+    setPlaceName(name)
+    update('location', `${name} (${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)})`)
   }
 
   async function handleSubmit(e) {
@@ -98,6 +143,27 @@ export default function ReportLostFound() {
     }
   }
 
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords
+        const loc = { lat: latitude, lng: longitude }
+        setLatLng(loc)
+        setMapCenter([latitude, longitude])
+        const name = await reverseGeocode(latitude, longitude)
+        setPlaceName(name)
+        update('location', `${name} (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`)
+      },
+      (err) => {
+        alert('Failed to get location: ' + err.message)
+      }
+    )
+  }
+
   if (submitted) {
     return (
       <div>
@@ -133,20 +199,31 @@ export default function ReportLostFound() {
             <button
               type="button"
               className={`pm-lf-type ${type === 'lost' ? 'pm-lf-type--active' : ''}`}
-              onClick={() => setType('lost')}
+              onClick={() => {
+                setType('lost')
+                setLatLng(null)
+                setPlaceName('')
+                update('location', '')
+              }}
             >
               I lost a pet
             </button>
             <button
               type="button"
               className={`pm-lf-type ${type === 'found' ? 'pm-lf-type--active' : ''}`}
-              onClick={() => setType('found')}
+              onClick={() => {
+                setType('found')
+                setLatLng(null)
+                setPlaceName('')
+                update('location', '')
+              }}
             >
               I found an animal
             </button>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="pm-lf-form">
+            {/* Photo */}
             <div className={`pm-field ${errors.photo ? 'pm-field--error' : ''}`}>
               <label htmlFor="photo">Photo</label>
               <label className="pm-photo-drop" htmlFor="photo">
@@ -213,15 +290,65 @@ export default function ReportLostFound() {
               </div>
             </div>
 
+            {/* Location Map */}
             <div className={`pm-field ${errors.location ? 'pm-field--error' : ''}`}>
-              <label htmlFor="location">Location</label>
-              <input
-                id="location"
-                value={form.location}
-                onChange={(e) => update('location', e.target.value)}
-                placeholder="Street, landmark, or area"
-              />
-              {errors.location && <p className="pm-field__error">{errors.location}</p>}
+              <label>{type === 'lost' ? 'Last seen location (Tap map to drop pin)' : 'Found location (Tap map to drop pin)'}</label>
+              <div style={{ position: 'relative', marginBottom: '12px' }}>
+                <MapContainer
+                  center={[12.9716, 77.5946]}
+                  zoom={12}
+                  maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
+                  style={{ height: '320px', width: '100%', borderRadius: '10px', zIndex: 1 }}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <LocationMarker 
+                    position={latLng} 
+                    setPosition={setLatLng} 
+                    onSetCoords={handleSetLatLng} 
+                  />
+                  <ChangeMapView center={mapCenter} />
+                </MapContainer>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                <label htmlFor="location_name" style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '0' }}>Location</label>
+                <input
+                  id="location_name"
+                  type="text"
+                  value={placeName}
+                  onChange={(e) => {
+                    setPlaceName(e.target.value)
+                    if (latLng) {
+                      update('location', `${e.target.value} (${latLng.lat.toFixed(6)}, ${latLng.lng.toFixed(6)})`)
+                    } else {
+                      update('location', e.target.value)
+                    }
+                  }}
+                  placeholder="Tap map to get readable location name..."
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px' }}
+                />
+              </div>
+
+              <div className="pm-location-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  {latLng ? (
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                      Coordinates: {latLng.lat.toFixed(5)}, {latLng.lng.toFixed(5)}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic' }}>
+                      No location selected yet. Tap the map to drop a pin.
+                    </span>
+                  )}
+                </div>
+                <button type="button" className="btn-pm btn-pm--outline-light" onClick={useCurrentLocation}>
+                  📍 Use current location
+                </button>
+              </div>
+              {errors.location && <p className="pm-field__error" style={{ marginTop: '4px' }}>{errors.location}</p>}
             </div>
 
             <div className="pm-field">
@@ -269,7 +396,7 @@ export default function ReportLostFound() {
               </div>
             </div>
 
-            {errors.submit && <p className="pm-field__error">{errors.submit}</p>}
+            {errors.submit && <p className="pm-field__error" style={{ marginBottom: '12px' }}>{errors.submit}</p>}
             <button type="submit" className="btn-pm btn-pm--orange btn-pm--full" disabled={submitting}>
               {submitting ? 'Submitting…' : 'Submit report'}
             </button>

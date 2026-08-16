@@ -1,9 +1,23 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { reverseGeocode } from '../lib/geocode.js'
 import './volunteerDashboard.css'
+
+// Fix leaflet icon loading issue in Vite
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+})
+L.Marker.prototype.options.icon = DefaultIcon
 
 const API = 'http://localhost:8000/api'
 
@@ -23,7 +37,7 @@ function timeAgo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
   const mins = Math.round(diffMs / 60000)
   if (mins < 60) return `${mins} min ago`
-  const hrs = Math.round(mins / 60)
+  const hrs = Math.round(diffMs / 60)
   if (hrs < 24) return `${hrs} hr ago`
   return `${Math.round(hrs / 24)} day ago`
 }
@@ -40,6 +54,8 @@ function adaptCase(c) {
     aggressionLevel: c.aggression_level,
     location:       c.ward || `${c.latitude}, ${c.longitude}`,
     ward:           c.ward || 'Unknown',
+    latitude:       parseFloat(c.latitude),
+    longitude:      parseFloat(c.longitude),
     distanceKm:     '—',   // calculate later with real geolocation
     reportedAt:     c.created_at,
     status:         STATUS_MAP[c.status] || 'reported',
@@ -51,9 +67,29 @@ function adaptCase(c) {
   }
 }
 
+function CasePopup({ c }) {
+  const [address, setAddress] = useState(c.ward && c.ward !== 'Unknown' ? c.ward : 'Loading location...')
+
+  useEffect(() => {
+    if (c.ward && c.ward !== 'Unknown') return
+    if (!c.latitude || !c.longitude) return
+    reverseGeocode(c.latitude, c.longitude).then(setAddress)
+  }, [c])
+
+  return (
+    <div style={{ fontSize: '13px' }}>
+      <strong>{c.id}</strong><br />
+      <strong>Species:</strong> {c.species}<br />
+      <strong>Severity:</strong> {c.severityLabel}<br />
+      <strong>Location:</strong> {address}
+    </div>
+  )
+}
+
 export default function VolunteerDashboard() {
   const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
   const [cases, setCases]     = useState([])
+  const [vrsScore, setVrsScore] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
   const [severityFilter, setSeverityFilter] = useState('all')
@@ -75,12 +111,28 @@ export default function VolunteerDashboard() {
     }
   }, [accessToken])
 
+  const fetchVrsScore = useCallback(async () => {
+    if (!accessToken) return
+    try {
+      const res = await fetch(`${API}/volunteers/vrs/`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setVrsScore(data.vrs_score ? parseFloat(data.vrs_score) : null)
+      }
+    } catch {
+      // Ignore score loading failure
+    }
+  }, [accessToken])
+
   useEffect(() => {
     fetchCases()
+    fetchVrsScore()
     // poll every 30 seconds for new cases
     const interval = setInterval(fetchCases, 30000)
     return () => clearInterval(interval)
-  }, [fetchCases])
+  }, [fetchCases, fetchVrsScore])
 
   if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
@@ -189,7 +241,9 @@ export default function VolunteerDashboard() {
             </div>
             {user?.is_verified && (
               <div className="pm-vd-reliability">
-                <span className="pm-vd-reliability__value">—</span>
+                <span className="pm-vd-reliability__value">
+                  {vrsScore !== null ? `${(vrsScore * 100).toFixed(0)}%` : '—'}
+                </span>
                 <span className="pm-vd-reliability__label">Reliability score</span>
               </div>
             )}
@@ -273,6 +327,33 @@ export default function VolunteerDashboard() {
           <p className="pm-vd-atomic-note">
             🔒 Claims are atomic — the first volunteer to hit "Claim" locks the case immediately.
           </p>
+
+          {/* Interactive Map */}
+          {feed.length > 0 && (
+            <div style={{ height: '300px', width: '100%', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e5e7eb', marginBottom: '24px', zIndex: 1 }}>
+              <MapContainer
+                center={[12.9716, 77.5946]}
+                zoom={12}
+                maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {feed
+                  .filter(c => c.latitude && c.longitude)
+                  .map((c) => (
+                    <Marker key={c.id} position={[c.latitude, c.longitude]}>
+                      <Popup>
+                        <CasePopup c={c} />
+                      </Popup>
+                    </Marker>
+                  ))}
+              </MapContainer>
+            </div>
+          )}
+
           <div className="pm-vd-feed__head">
             <h2 className="pm-vd-section-title">
               Reported near you ({feed.length} open)

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import './analytics.css'
@@ -135,6 +136,43 @@ export default function Analytics() {
                 )}
               </p>
 
+              {/* Map displaying hotspot clusters */}
+              <div style={{ height: '380px', width: '100%', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb', marginBottom: '28px', zIndex: 1 }}>
+                <MapContainer
+                  center={[12.9716, 77.5946]}
+                  zoom={12}
+                  maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
+                  style={{ height: '100%', width: '100%' }}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  {clusters.map((h) => (
+                    <Circle
+                      key={h.cluster_label}
+                      center={[parseFloat(h.centroid_lat), parseFloat(h.centroid_lon)]}
+                      radius={150 + h.case_count * 20} // Base size 150m + 20m per case
+                      pathOptions={{
+                        color: '#f97316',
+                        fillColor: '#f97316',
+                        fillOpacity: 0.35,
+                        weight: 2
+                      }}
+                    >
+                      <Popup>
+                        <div style={{ fontSize: '13px' }}>
+                          <strong>Cluster {h.cluster_label + 1}</strong><br />
+                          <strong>Cases:</strong> {h.case_count}<br />
+                          <strong>Dominant Species:</strong> {h.dominant_species}<br />
+                          <strong>Centroid:</strong> {parseFloat(h.centroid_lat).toFixed(4)}, {parseFloat(h.centroid_lon).toFixed(4)}
+                        </div>
+                      </Popup>
+                    </Circle>
+                  ))}
+                </MapContainer>
+              </div>
+
               {clusters.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px', background: '#f9fafb', borderRadius: 10, border: '1px dashed #e5e7eb' }}>
                   <p style={{ color: '#6b7280', fontSize: 14 }}>
@@ -158,7 +196,7 @@ export default function Analytics() {
               )}
 
               {noiseCount > 0 && (
-                <p className="pm-hotspots__noise">
+                <p className="pm-hotspots__noise" style={{ marginTop: '20px' }}>
                   + {noiseCount} reports were too sparse to form a cluster (DBSCAN noise points) — still tracked individually.
                 </p>
               )}
