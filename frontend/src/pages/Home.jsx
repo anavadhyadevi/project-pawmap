@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { reverseGeocode } from '../lib/geocode.js'
 import './home.css'
+
 const API = 'http://localhost:8000/api'
 
 const STATUS_COLOUR = {
@@ -15,6 +19,21 @@ const STATUS_COLOUR = {
   'Unresolved':  { bg: '#f3f4f6', text: '#374151', label: 'Unresolved' },
 }
 
+function createStatusIcon(status) {
+  let color = '#9ca3af' // Grey
+  if (status === 'Open') color = '#f97316' // Orange
+  else if (status === 'In_Progress' || status === 'On_Site') color = '#2563eb' // Blue
+  else if (status === 'Resolved') color = '#10b981' // Green
+  else if (status === 'Escalated') color = '#dc2626' // SOS Red
+
+  return L.divIcon({
+    html: `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
+    className: 'custom-status-marker',
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+  })
+}
+
 function timeAgo(iso) {
   const mins = Math.round((Date.now() - new Date(iso)) / 60000)
   if (mins < 60) return `${mins} min ago`
@@ -23,14 +42,67 @@ function timeAgo(iso) {
   return `${Math.round(hrs / 24)} day ago`
 }
 
+function CaseLocation({ lat, lon, ward, index }) {
+  const [address, setAddress] = useState(ward || '')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (ward) return
+    if (!lat || !lon) return
+    
+    // Only auto-geocode the first 5 items to respect API rate limits
+    if (index < 5) {
+      setLoading(true)
+      const timer = setTimeout(() => {
+        reverseGeocode(parseFloat(lat), parseFloat(lon))
+          .then((addr) => {
+            setAddress(addr)
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      }, index * 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [lat, lon, ward, index])
+
+  if (address) {
+    return <span>📍 {address}</span>
+  }
+
+  return (
+    <span>
+      📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lon).toFixed(4)}
+      {loading ? (
+        <span style={{ fontSize: '11px', color: '#9ca3af', marginLeft: '6px' }}>(loading...)</span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true)
+            reverseGeocode(parseFloat(lat), parseFloat(lon))
+              .then((addr) => {
+                setAddress(addr)
+                setLoading(false)
+              })
+              .catch(() => setLoading(false))
+          }}
+          style={{
+            background: 'none', border: 'none', padding: '0',
+            color: 'var(--pm-orange, #f97316)', textDecoration: 'underline',
+            fontSize: '11px', marginLeft: '6px', cursor: 'pointer'
+          }}
+        >
+          Show address
+        </button>
+      )}
+    </span>
+  )
+}
+
 export default function Home() {
   const { user, isLoggedIn, accessToken, loading: authLoading } = useAuth()
   const [myCases, setMyCases]   = useState([])
   const [loading, setLoading]   = useState(false)
-
-  if (authLoading) return null
-  if (isLoggedIn && user?.role === 'NGO_Admin')  return <Navigate to="/ngo/dashboard" replace />
-  if (isLoggedIn && user?.role === 'Volunteer')  return <Navigate to="/volunteer/dashboard" replace />
 
   useEffect(() => {
     if (!isLoggedIn || !accessToken) return
@@ -43,6 +115,10 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [isLoggedIn, accessToken])
+
+  if (authLoading) return null
+  if (isLoggedIn && user?.role === 'NGO_Admin')  return <Navigate to="/ngo/dashboard" replace />
+  if (isLoggedIn && user?.role === 'Volunteer')  return <Navigate to="/volunteer/dashboard" replace />
 
   return (
     <div className="pm-home">
@@ -99,49 +175,83 @@ export default function Home() {
               </div>
             )}
             {!loading && myCases.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {myCases.map(c => {
-                  const s = STATUS_COLOUR[c.status] || STATUS_COLOUR['Open']
-                  return (
-                    <div key={c.case_id} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '16px 20px', background: '#fafafa',
-                      border: '1px solid #e5e7eb', borderRadius: 10, gap: 16, flexWrap: 'wrap'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                        {c.photo ? (
-                          <img src={c.photo} alt={c.species}
-                            style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 8 }}
-                            onError={e => e.target.style.display = 'none'}/>
-                        ) : (
-                          <div style={{ width: 52, height: 52, borderRadius: 8, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-                            🐾
-                          </div>
-                        )}
-                        <div>
-                          <p style={{ fontWeight: 600, fontSize: 14, color: '#111', marginBottom: 2 }}>
-                            {c.species} · {c.case_id}
-                          </p>
-                          <p style={{ fontSize: 12, color: '#6b7280' }}>
-                            📍 {c.ward || `${c.latitude}, ${c.longitude}`} · {timeAgo(c.created_at)}
-                          </p>
-                          {c.volunteer_name && (
-                            <p style={{ fontSize: 12, color: '#4b5563', marginTop: 2 }}>
-                              Volunteer: {c.volunteer_name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <span style={{
-                        padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                        background: s.bg, color: s.text
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                  {myCases.map((c, i) => {
+                    const s = STATUS_COLOUR[c.status] || STATUS_COLOUR['Open']
+                    return (
+                      <div key={c.case_id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '16px 20px', background: '#fafafa',
+                        border: '1px solid #e5e7eb', borderRadius: 10, gap: 16, flexWrap: 'wrap'
                       }}>
-                        {s.label}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                          {c.photo ? (
+                            <img src={c.photo} alt={c.species}
+                              style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 8 }}
+                              onError={e => e.target.style.display = 'none'}/>
+                          ) : (
+                            <div style={{ width: 52, height: 52, borderRadius: 8, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
+                              🐾
+                            </div>
+                          )}
+                          <div>
+                            <p style={{ fontWeight: 600, fontSize: 14, color: '#111', marginBottom: 2 }}>
+                              {c.species} · {c.case_id}
+                            </p>
+                            <p style={{ fontSize: 12, color: '#6b7280' }}>
+                              <CaseLocation lat={c.latitude} lon={c.longitude} ward={c.ward_name || c.ward} index={i} /> · {timeAgo(c.created_at)}
+                            </p>
+                            {c.volunteer_name && (
+                              <p style={{ fontSize: 12, color: '#4b5563', marginTop: 2 }}>
+                                Volunteer: {c.volunteer_name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                          background: s.bg, color: s.text
+                        }}>
+                          {s.label}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div style={{ height: '350px', width: '100%', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb', zIndex: 1 }}>
+                  <MapContainer
+                    center={[12.9716, 77.5946]}
+                    zoom={12}
+                    maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    {myCases
+                      .filter(c => c.latitude && c.longitude)
+                      .map(c => (
+                        <Marker
+                          key={c.case_id}
+                          position={[parseFloat(c.latitude), parseFloat(c.longitude)]}
+                          icon={createStatusIcon(c.status)}
+                        >
+                          <Popup>
+                            <div style={{ fontSize: '13px' }}>
+                              <strong>{c.case_id}</strong><br />
+                              <strong>Species:</strong> {c.species}<br />
+                              <strong>Status:</strong> {c.status.replace('_', ' ')}<br />
+                              {c.ward_name && <><strong>Ward:</strong> {c.ward_name}</>}
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                  </MapContainer>
+                </div>
+              </>
             )}
           </div>
         </section>
