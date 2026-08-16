@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { apiRequest } from '../lib/api.js'
@@ -7,11 +7,23 @@ import './auth.css'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, isLoggedIn, user, loading } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
+
+  if (loading) return null
+
+  if (isLoggedIn) {
+    if (user?.role === 'NGO_Admin') {
+      return <Navigate to="/ngo/dashboard" replace />
+    }
+    if (user?.role === 'Volunteer') {
+      return <Navigate to="/volunteer/dashboard" replace />
+    }
+    return <Navigate to="/" replace />
+  }
 
   function handleChange(e) {
     const { name, value } = e.target

@@ -42,26 +42,67 @@ function timeAgo(iso) {
   return `${Math.round(hrs / 24)} day ago`
 }
 
-function CaseLocation({ lat, lon, ward }) {
-  const [address, setAddress] = useState(ward || 'Loading location...')
+function CaseLocation({ lat, lon, ward, index }) {
+  const [address, setAddress] = useState(ward || '')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (ward) return
     if (!lat || !lon) return
-    reverseGeocode(parseFloat(lat), parseFloat(lon)).then(setAddress)
-  }, [lat, lon, ward])
+    
+    // Only auto-geocode the first 5 items to respect API rate limits
+    if (index < 5) {
+      setLoading(true)
+      const timer = setTimeout(() => {
+        reverseGeocode(parseFloat(lat), parseFloat(lon))
+          .then((addr) => {
+            setAddress(addr)
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      }, index * 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [lat, lon, ward, index])
 
-  return <span>📍 {address}</span>
+  if (address) {
+    return <span>📍 {address}</span>
+  }
+
+  return (
+    <span>
+      📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lon).toFixed(4)}
+      {loading ? (
+        <span style={{ fontSize: '11px', color: '#9ca3af', marginLeft: '6px' }}>(loading...)</span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true)
+            reverseGeocode(parseFloat(lat), parseFloat(lon))
+              .then((addr) => {
+                setAddress(addr)
+                setLoading(false)
+              })
+              .catch(() => setLoading(false))
+          }}
+          style={{
+            background: 'none', border: 'none', padding: '0',
+            color: 'var(--pm-orange, #f97316)', textDecoration: 'underline',
+            fontSize: '11px', marginLeft: '6px', cursor: 'pointer'
+          }}
+        >
+          Show address
+        </button>
+      )}
+    </span>
+  )
 }
 
 export default function Home() {
   const { user, isLoggedIn, accessToken, loading: authLoading } = useAuth()
   const [myCases, setMyCases]   = useState([])
   const [loading, setLoading]   = useState(false)
-
-  if (authLoading) return null
-  if (isLoggedIn && user?.role === 'NGO_Admin')  return <Navigate to="/ngo/dashboard" replace />
-  if (isLoggedIn && user?.role === 'Volunteer')  return <Navigate to="/volunteer/dashboard" replace />
 
   useEffect(() => {
     if (!isLoggedIn || !accessToken) return
@@ -74,6 +115,10 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [isLoggedIn, accessToken])
+
+  if (authLoading) return null
+  if (isLoggedIn && user?.role === 'NGO_Admin')  return <Navigate to="/ngo/dashboard" replace />
+  if (isLoggedIn && user?.role === 'Volunteer')  return <Navigate to="/volunteer/dashboard" replace />
 
   return (
     <div className="pm-home">
@@ -132,7 +177,7 @@ export default function Home() {
             {!loading && myCases.length > 0 && (
               <>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-                  {myCases.map(c => {
+                  {myCases.map((c, i) => {
                     const s = STATUS_COLOUR[c.status] || STATUS_COLOUR['Open']
                     return (
                       <div key={c.case_id} style={{
@@ -155,7 +200,7 @@ export default function Home() {
                               {c.species} · {c.case_id}
                             </p>
                             <p style={{ fontSize: 12, color: '#6b7280' }}>
-                              <CaseLocation lat={c.latitude} lon={c.longitude} ward={c.ward_name || c.ward} /> · {timeAgo(c.created_at)}
+                              <CaseLocation lat={c.latitude} lon={c.longitude} ward={c.ward_name || c.ward} index={i} /> · {timeAgo(c.created_at)}
                             </p>
                             {c.volunteer_name && (
                               <p style={{ fontSize: 12, color: '#4b5563', marginTop: 2 }}>

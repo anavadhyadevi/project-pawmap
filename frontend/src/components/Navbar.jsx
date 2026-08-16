@@ -86,7 +86,7 @@ export default function Navbar({ variant = 'light' }) {
                   Pending approval
                 </span>
               )}
-              <span className="pm-nav__user">Hi, {user.full_name}</span>
+              <span className="pm-nav__user" style={{ color: isDark ? 'var(--pm-paper)' : 'var(--pm-ink)' }}>Hi, {user.full_name}</span>
               <button type="button" className="pm-nav__login pm-nav__logout" onClick={handleLogout}>
                 Log out
               </button>
