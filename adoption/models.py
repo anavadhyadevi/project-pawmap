@@ -32,7 +32,7 @@ class AdoptionListing(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.listing_id:
-            last = AdoptionListing.objects.order_by('-published_at').first()
+            last = AdoptionListing.objects.order_by('-id').first()
             if last and last.listing_id:
                 num = int(last.listing_id.split('-')[1]) + 1
             else:
@@ -90,7 +90,7 @@ class AdoptionRecord(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.adoption_id:
-            last = AdoptionRecord.objects.order_by('-approved_at').first()
+            last = AdoptionRecord.objects.order_by('-id').first()
             if last and last.adoption_id:
                 num = int(last.adoption_id.split('-')[1]) + 1
             else:

@@ -17,7 +17,7 @@ const RECORD_TYPES = [
 ]
 
 export default function MedicalRecords() {
-  const { user, accessToken, isLoggedIn } = useAuth()
+  const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
 
   const [animals, setAnimals] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,6 +43,7 @@ export default function MedicalRecords() {
 
   useEffect(() => { fetchAnimals() }, [fetchAnimals])
 
+  if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
   if (!['Volunteer', 'NGO_Admin'].includes(user.role)) return <Navigate to="/" replace />
 
@@ -54,14 +55,13 @@ export default function MedicalRecords() {
     if (!form.detail.trim()) return
     setSubmitting(true)
     try {
-      const res = await fetch(`${API_BASE_URL}/medical/records/`, {
+      const res = await fetch(`${API_BASE_URL}/medical/${animalId}/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          animal: animalId,
           entry_type: form.type,
           details: form.detail,
         }),
@@ -172,7 +172,7 @@ function AnimalMedicalDetail({ animal, accessToken, form, setForm, submitting, o
   const fetchRecords = useCallback(async () => {
     try {
       const res = await fetch(
-        `${API_BASE_URL}/medical/records/?animal=${animal.animal_id}`,
+        `${API_BASE_URL}/medical/${animal.animal_id}/`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
       const data = await res.json()

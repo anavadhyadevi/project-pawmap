@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         if not self.user_id:
-            last = User.objects.order_by('-created_at').first()
+            last = User.objects.order_by('-id').first()
             if last and last.user_id:
                 num = int(last.user_id.split('-')[1]) + 1
             else:

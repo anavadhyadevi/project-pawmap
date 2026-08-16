@@ -14,10 +14,50 @@ export default function VolunteerAnalytics() {
   const fetchStats = useCallback(async () => {
     if (!accessToken) return
     try {
-      const res = await fetch(`${API_BASE_URL}/volunteers/my-analytics/`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const [vrsRes, casesRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/volunteers/vrs/`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).then(r => r.json()),
+        fetch(`${API_BASE_URL}/cases/my-volunteer-cases/`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).then(r => r.json()),
+      ])
+
+      const casesList = casesRes.results ?? casesRes ?? []
+      const resolvedCount = casesList.filter(c => c.status === 'Resolved').length
+      const claimedCount = casesList.length
+
+      const vrsScoreVal = vrsRes.vrs_score ? parseFloat(vrsRes.vrs_score) : 0
+      const responseRateVal = vrsRes.response_rate ? parseFloat(vrsRes.response_rate) : 0
+      const completionRateVal = vrsRes.completion_rate ? parseFloat(vrsRes.completion_rate) : 0
+      const avgResponseVal = vrsRes.avg_response_time_min ? parseFloat(vrsRes.avg_response_time_min) : 0
+      
+      const speedScore = Math.max(0, 1 - (avgResponseVal / 30))
+
+      const summary = [
+        { label: 'Cases resolved', value: resolvedCount },
+        { label: 'Cases claimed', value: claimedCount },
+        { label: 'Reliability score', value: vrsScoreVal.toFixed(2) },
+      ]
+
+      const reliabilityBreakdown = [
+        { factor: 'Response rate', score: Math.round(responseRateVal * 100) },
+        { factor: 'Completion rate', score: Math.round(completionRateVal * 100) },
+        { factor: 'Response speed', score: Math.round(speedScore * 100) },
+      ]
+
+      const recentCases = casesList.slice(0, 8).map(c => ({
+        id: c.case_id,
+        species: c.species,
+        location: c.ward_name || 'Bengaluru',
+        status: c.status.replace('_', ' ')
+      }))
+
+      setStats({
+        summary,
+        reliabilityBreakdown,
+        recentCases
       })
-      setStats(await res.json())
     } catch (err) {
       console.error(err)
     } finally {
@@ -29,7 +69,7 @@ export default function VolunteerAnalytics() {
 
   if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
-  if (user.role !== 'NGO_Admin') return <Navigate to="/analytics" replace />
+  if (user.role !== 'Volunteer') return <Navigate to="/analytics" replace />
   
   if (loading || !stats) {
     return (

@@ -11,7 +11,7 @@ class HotspotRun(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.run_id:
-            last = HotspotRun.objects.order_by('-created_at').first()
+            last = HotspotRun.objects.order_by('-id').first()
             if last and last.run_id:
                 num = int(last.run_id.split('-')[1]) + 1
             else:

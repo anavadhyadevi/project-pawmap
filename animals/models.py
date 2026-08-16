@@ -75,7 +75,7 @@ class Animal(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.animal_id:
-            last = Animal.objects.order_by('-created_at').first()
+            last = Animal.objects.order_by('-id').first()
             if last and last.animal_id:
                 num = int(last.animal_id.split('-')[1]) + 1
             else:

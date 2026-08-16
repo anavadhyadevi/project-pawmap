@@ -18,7 +18,7 @@ class MedicalRecordListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = MedicalRecord.objects.all()
-        animal_id = self.request.query_params.get('animal')
+        animal_id = self.kwargs.get('animal_id') or self.request.query_params.get('animal')
         if animal_id:
             qs = qs.filter(animal__animal_id=animal_id)
         return qs
@@ -29,7 +29,12 @@ class MedicalRecordListCreateView(generics.ListCreateAPIView):
                 {'error': 'Only volunteers, vets, or NGO admins can log medical records.'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        url_animal_id = self.kwargs.get('animal_id')
+        if url_animal_id and not data.get('animal'):
+            data['animal'] = url_animal_id
+
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         record = serializer.save(vet=request.user)
         return Response(

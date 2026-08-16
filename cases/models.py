@@ -106,7 +106,7 @@ class Case(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.case_id:
-            last = Case.objects.order_by('-created_at').first()
+            last = Case.objects.order_by('-id').first()
             if last and last.case_id:
                 num = int(last.case_id.split('-')[1]) + 1
             else:
@@ -139,7 +139,7 @@ class CaseStatusLog(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.log_id:
-            last = CaseStatusLog.objects.order_by('-changed_at').first()
+            last = CaseStatusLog.objects.order_by('-id').first()
             if last and last.log_id:
                 num = int(last.log_id.split('-')[1]) + 1
             else:
@@ -183,7 +183,7 @@ class LostPetReport(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.lost_report_id:
-            last = LostPetReport.objects.order_by('-created_at').first()
+            last = LostPetReport.objects.order_by('-id').first()
             if last and last.lost_report_id:
                 num = int(last.lost_report_id.split('-')[1]) + 1
             else:
@@ -231,7 +231,7 @@ class FoundPetReport(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.found_report_id:
-            last = FoundPetReport.objects.order_by('-created_at').first()
+            last = FoundPetReport.objects.order_by('-id').first()
             if last and last.found_report_id:
                 num = int(last.found_report_id.split('-')[1]) + 1
             else:

@@ -28,12 +28,13 @@ class CaseStatusLogSerializer(serializers.ModelSerializer):
 class CaseSerializer(serializers.ModelSerializer):
     reporter_name  = serializers.CharField(source='reporter.full_name',  read_only=True)
     volunteer_name = serializers.CharField(source='volunteer.full_name', read_only=True)
+    ward_name      = serializers.CharField(source='ward.ward_name',      read_only=True)
     status_logs    = CaseStatusLogSerializer(many=True, read_only=True)
 
     class Meta:
         model  = Case
         fields = [
-            'case_id', 'latitude', 'longitude', 'ward',
+            'case_id', 'latitude', 'longitude', 'ward', 'ward_name',
             'species', 'breed', 'estimated_age',
             'severity', 'aggression_level', 'injury_type',
             'bystander_action', 'description', 'photo',

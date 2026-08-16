@@ -33,7 +33,7 @@ class MedicalRecord(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.record_id:
-            last = MedicalRecord.objects.order_by('-timestamp').first()
+            last = MedicalRecord.objects.order_by('-id').first()
             if last and last.record_id:
                 num = int(last.record_id.split('-')[1]) + 1
             else:
