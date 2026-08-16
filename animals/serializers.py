@@ -22,6 +22,7 @@ class AnimalSerializer(serializers.ModelSerializer):
                             source='current_foster.full_name', read_only=True
                           )
     case_id = serializers.CharField(source='case.case_id', read_only=True)
+    listing_id = serializers.CharField(source='adoption_listing.listing_id', read_only=True, required=False, allow_null=True)
 
     class Meta:
         model  = Animal
@@ -31,7 +32,7 @@ class AnimalSerializer(serializers.ModelSerializer):
             'temperament_score', 'adoption_status', 'ownership_status',
             'case_id', 'current_foster', 'current_foster_name',
             'created_at', 'updated_at',
-            'temperament_ratings',
+            'temperament_ratings', 'listing_id',
         ]
         read_only_fields = ['animal_id', 'temperament_score', 'created_at', 'updated_at']
 

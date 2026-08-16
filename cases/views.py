@@ -251,3 +251,14 @@ class FoundPetReportListCreateView(generics.ListCreateAPIView):
             FoundPetReportSerializer(report).data,
             status=status.HTTP_201_CREATED
         )
+
+
+class MyVolunteerCasesView(generics.ListAPIView):
+    """
+    GET /api/cases/my-volunteer-cases/ — list of cases claimed by the logged in volunteer
+    """
+    serializer_class   = CaseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Case.objects.filter(volunteer=self.request.user).order_by('-created_at')

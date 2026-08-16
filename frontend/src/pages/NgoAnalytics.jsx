@@ -16,13 +16,27 @@ export default function NgoAnalytics() {
   const fetchAll = useCallback(async () => {
     if (!accessToken) return
     try {
-      const [summaryRes, hotspotsRes] = await Promise.all([
+      const [summaryRes, hotspotsRes, geoRes] = await Promise.all([
         fetch(`${API_BASE_URL}/analytics/ngo-summary/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }).then(r => r.json()),
         fetch(`${API_BASE_URL}/analytics/hotspots/`).then(r => r.json()),
+        fetch(`${API_BASE_URL}/analytics/cases-geo/`).then(r => r.json()),
       ])
-      setData(summaryRes)
+
+      const wardCounts = {}
+      geoRes.forEach((c) => {
+        const wName = c.ward || 'Unknown'
+        wardCounts[wName] = (wardCounts[wName] || 0) + 1
+      })
+      const casesByWard = Object.entries(wardCounts)
+        .map(([ward, count]) => ({ ward, count }))
+        .sort((a, b) => b.count - a.count)
+
+      setData({
+        ...summaryRes,
+        cases_by_ward: casesByWard,
+      })
       setHotspots(hotspotsRes.clusters ?? [])
     } catch (err) {
       console.error(err)

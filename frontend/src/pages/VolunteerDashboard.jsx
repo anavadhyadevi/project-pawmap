@@ -52,7 +52,7 @@ function adaptCase(c) {
 }
 
 export default function VolunteerDashboard() {
-  const { user, accessToken, isLoggedIn } = useAuth()
+  const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
   const [cases, setCases]     = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
@@ -82,6 +82,7 @@ export default function VolunteerDashboard() {
     return () => clearInterval(interval)
   }, [fetchCases])
 
+  if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
   if (user?.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
 

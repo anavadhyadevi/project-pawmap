@@ -27,7 +27,9 @@ const EXPECTATIONS = [
 ]
 
 export default function Volunteer() {
-  const { user, isLoggedIn } = useAuth()
+  const { user, isLoggedIn, loading } = useAuth()
+
+  if (loading) return null
 
   // NGOs don't apply to volunteer — send them to their own dashboard instead.
   // NGOs don't apply to volunteer — send them to their own dashboard instead.

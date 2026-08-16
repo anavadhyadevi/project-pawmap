@@ -24,10 +24,11 @@ function timeAgo(iso) {
 }
 
 export default function Home() {
-  const { user, isLoggedIn, accessToken } = useAuth()
+  const { user, isLoggedIn, accessToken, loading: authLoading } = useAuth()
   const [myCases, setMyCases]   = useState([])
   const [loading, setLoading]   = useState(false)
 
+  if (authLoading) return null
   if (isLoggedIn && user?.role === 'NGO_Admin')  return <Navigate to="/ngo/dashboard" replace />
   if (isLoggedIn && user?.role === 'Volunteer')  return <Navigate to="/volunteer/dashboard" replace />
 

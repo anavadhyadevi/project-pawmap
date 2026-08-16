@@ -15,7 +15,7 @@ function timeAgo(iso) {
 }
 
 export default function NgoDashboard() {
-  const { user, accessToken, isLoggedIn } = useAuth()
+  const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
 
   const [cases, setCases]         = useState([])
   const [volunteers, setVolunteers] = useState([])
@@ -45,6 +45,7 @@ export default function NgoDashboard() {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
+  if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
   if (user?.role !== 'NGO_Admin') return <Navigate to="/" replace />
 

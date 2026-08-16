@@ -109,3 +109,28 @@ class VolunteerAnalyticsSummaryView(APIView):
             'reliabilityBreakdown': reliability_breakdown,
             'recentCases': recent_cases,
         }, status=status.HTTP_200_OK)
+
+
+class VolunteerVRSView(APIView):
+    """
+    GET /api/volunteers/vrs/ — returns current VRS score for the logged-in volunteer.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'Volunteer':
+            return Response(
+                {'error': 'Only volunteers have a VRS score.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from django.utils import timezone
+        score = VolunteerReliabilityScore.objects.filter(
+            volunteer=request.user,
+            score_date=timezone.now().date()
+        ).first()
+        if not score:
+            score = VolunteerReliabilityScore.compute_for_volunteer(request.user)
+            
+        serializer = VolunteerReliabilityScoreSerializer(score)
+        return Response(serializer.data, status=status.HTTP_200_OK)

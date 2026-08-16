@@ -13,7 +13,9 @@ const SEVERITIES = [
 
 export default function ReportStray() {
   const navigate = useNavigate()
-  const { user, isLoggedIn, accessToken } = useAuth()
+  const { user, isLoggedIn, accessToken, loading } = useAuth()
+
+  if (loading) return null
 
   // NGOs manage the platform, not file reports — send them to their dashboard.
   // NGOs manage the platform, not file reports — send them to their dashboard.
