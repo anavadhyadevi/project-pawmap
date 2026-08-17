@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { PawPrint } from 'lucide-react'
 import './footer.css'
 
 export default function Footer() {
@@ -6,7 +7,7 @@ export default function Footer() {
     <footer className="pm-footer">
       <div className="container-pm pm-footer__inner">
         <div className="pm-footer__brand">
-          <span className="pm-nav__brand-mark" aria-hidden="true">🐾</span> PawMap
+          <span className="pm-nav__brand-mark" aria-hidden="true"><PawPrint size="1em" /></span> PawMap
           <p>Community-driven rescue for the strays of Bengaluru.</p>
         </div>
         <div className="pm-footer__cols">

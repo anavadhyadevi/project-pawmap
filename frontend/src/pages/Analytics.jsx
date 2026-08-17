@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet'
+import { MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import './analytics.css'
@@ -187,7 +188,7 @@ export default function Analytics() {
                       <h3>Cluster {h.cluster_label + 1}</h3>
                       <p className="pm-hotspot-card__count">{h.case_count} cases</p>
                       <div className="pm-hotspot-card__meta">
-                        <span>📍 {parseFloat(h.centroid_lat).toFixed(4)}, {parseFloat(h.centroid_lon).toFixed(4)}</span>
+                        <span><MapPin size="1em" aria-hidden="true" /> {parseFloat(h.centroid_lat).toFixed(4)}, {parseFloat(h.centroid_lon).toFixed(4)}</span>
                         <span>Mostly {h.dominant_species}</span>
                       </div>
                     </div>

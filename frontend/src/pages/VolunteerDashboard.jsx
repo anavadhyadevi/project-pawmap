@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
+import { LockKeyhole, MapPin, Siren } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -288,7 +289,7 @@ export default function VolunteerDashboard() {
                       <h3>{c.species} · {c.id}</h3>
                       <span className="pm-vd-status">{c.status.replace('_', ' ')}</span>
                     </div>
-                    <p className="pm-vd-card__meta">📍 {c.location}</p>
+                    <p className="pm-vd-card__meta"><MapPin size="1em" aria-hidden="true" /> {c.location}</p>
                     <p className="pm-vd-card__injury">{c.injuryType}</p>
                     <div className="pm-vd-card__actions">
                       {c.status === 'in_progress' && (
@@ -309,7 +310,7 @@ export default function VolunteerDashboard() {
                         <button type="button"
                           className="pm-vd-sos"
                           onClick={() => updateStatus(c.id, 'escalated')}>
-                          🚨 Escalate to SOS
+                          <Siren size="1em" aria-hidden="true" /> Escalate to SOS
                         </button>
                       )}
                     </div>
@@ -325,7 +326,7 @@ export default function VolunteerDashboard() {
       <section className="pm-vd-feed">
         <div className="container-pm">
           <p className="pm-vd-atomic-note">
-            🔒 Claims are atomic — the first volunteer to hit "Claim" locks the case immediately.
+            <LockKeyhole size="1em" aria-hidden="true" /> Claims are atomic — the first volunteer to hit "Claim" locks the case immediately.
           </p>
 
           {/* Interactive Map */}
@@ -391,7 +392,7 @@ export default function VolunteerDashboard() {
                       <h3>{c.species} · {c.id}</h3>
                       <span className="pm-vd-time">{timeAgo(c.reportedAt)}</span>
                     </div>
-                    <p className="pm-vd-card__meta">📍 {c.location}</p>
+                    <p className="pm-vd-card__meta"><MapPin size="1em" aria-hidden="true" /> {c.location}</p>
                     <p className="pm-vd-card__injury">{c.injuryType}</p>
                     <button type="button"
                       className="btn-pm btn-pm--orange btn-pm--full"

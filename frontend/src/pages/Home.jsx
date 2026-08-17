@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
+import { Camera, Home as HomeIcon, MapPin, PawPrint, Siren } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -66,12 +67,12 @@ function CaseLocation({ lat, lon, ward, index }) {
   }, [lat, lon, ward, index])
 
   if (address) {
-    return <span>📍 {address}</span>
+    return <span><MapPin size="1em" aria-hidden="true" /> {address}</span>
   }
 
   return (
     <span>
-      📍 {parseFloat(lat).toFixed(4)}, {parseFloat(lon).toFixed(4)}
+      <MapPin size="1em" aria-hidden="true" /> {parseFloat(lat).toFixed(4)}, {parseFloat(lon).toFixed(4)}
       {loading ? (
         <span style={{ fontSize: '11px', color: '#9ca3af', marginLeft: '6px' }}>(loading...)</span>
       ) : (
@@ -143,7 +144,7 @@ export default function Home() {
           </p>
           <div className="pm-hero__actions">
             <Link to="/report" className="btn-pm btn-pm--orange">
-              <span aria-hidden="true">📷</span> Report a Stray
+              <Camera size="1em" aria-hidden="true" /> Report a Stray
             </Link>
             {!isLoggedIn && (
               <Link to="/signup" className="btn-pm btn-pm--outline-dark">
@@ -192,7 +193,7 @@ export default function Home() {
                               onError={e => e.target.style.display = 'none'}/>
                           ) : (
                             <div style={{ width: 52, height: 52, borderRadius: 8, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-                              🐾
+                              <PawPrint size={22} aria-hidden="true" />
                             </div>
                           )}
                           <div>
@@ -261,17 +262,17 @@ export default function Home() {
       <section className="pm-why">
         <div className="container-pm pm-why__grid">
           <div className="pm-why__card">
-            <span className="pm-why__icon" aria-hidden="true">📍</span>
+            <span className="pm-why__icon" aria-hidden="true"><MapPin size="1em" /></span>
             <h3>Spot it, report it</h3>
             <p>Drop a pin, add a photo, and a note on severity — dispatch starts in seconds.</p>
           </div>
           <div className="pm-why__card">
-            <span className="pm-why__icon" aria-hidden="true">🚑</span>
+            <span className="pm-why__icon" aria-hidden="true"><Siren size="1em" /></span>
             <h3>Nearest volunteer, notified</h3>
             <p>PawMap routes every case to the closest verified volunteer, ranked by reliability.</p>
           </div>
           <div className="pm-why__card">
-            <span className="pm-why__icon" aria-hidden="true">🏠</span>
+            <span className="pm-why__icon" aria-hidden="true"><HomeIcon size="1em" /></span>
             <h3>From rescue to rehome</h3>
             <p>Medical history, temperament, and adoption status stay linked to every animal.</p>
           </div>

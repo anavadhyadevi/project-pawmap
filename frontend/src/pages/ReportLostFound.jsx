@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Camera, CheckCircle2, MapPin } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -170,7 +171,7 @@ export default function ReportLostFound() {
         <Navbar variant="light" />
         <div className="pm-lf-done">
           <div className="pm-lf-done__card">
-            <span aria-hidden="true">✅</span>
+            <CheckCircle2 size="1em" aria-hidden="true" />
             <h1>Report submitted</h1>
             <p>
               We've logged this {type === 'lost' ? 'lost pet' : 'found animal'} report and
@@ -231,7 +232,7 @@ export default function ReportLostFound() {
                   <img src={photoPreview} alt="Selected" />
                 ) : (
                   <span>
-                    <span className="pm-photo-drop__icon" aria-hidden="true">📷</span>
+                    <span className="pm-photo-drop__icon" aria-hidden="true"><Camera size="1em" /></span>
                     Tap to add a photo
                   </span>
                 )}
@@ -345,7 +346,7 @@ export default function ReportLostFound() {
                   )}
                 </div>
                 <button type="button" className="btn-pm btn-pm--outline-light" onClick={useCurrentLocation}>
-                  📍 Use current location
+                  <MapPin size="1em" aria-hidden="true" /> Use current location
                 </button>
               </div>
               {errors.location && <p className="pm-field__error" style={{ marginTop: '4px' }}>{errors.location}</p>}

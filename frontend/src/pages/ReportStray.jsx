@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
+import { Camera, CheckCircle2, MapPin } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -205,7 +206,7 @@ export default function ReportStray() {
         <Navbar variant="light" />
         <div className="pm-report-done">
           <div className="pm-report-done__card">
-            <span className="pm-report-done__icon" aria-hidden="true">✅</span>
+            <span className="pm-report-done__icon" aria-hidden="true"><CheckCircle2 size="1em" /></span>
             <h1>Report received</h1>
             <p>
               Case <strong>#{createdCaseId || 'A-0157'}</strong> has been logged. We're notifying the nearest
@@ -259,7 +260,7 @@ export default function ReportStray() {
                   <img src={photoPreview} alt="Selected stray" />
                 ) : (
                   <span>
-                    <span className="pm-photo-drop__icon" aria-hidden="true">📷</span>
+                    <span className="pm-photo-drop__icon" aria-hidden="true"><Camera size="1em" /></span>
                     Tap to add a photo
                   </span>
                 )}
@@ -320,7 +321,7 @@ export default function ReportStray() {
                   )}
                 </div>
                 <button type="button" className="btn-pm btn-pm--outline-light" onClick={useCurrentLocation}>
-                  📍 Use current location
+                  <MapPin size="1em" aria-hidden="true" /> Use current location
                 </button>
               </div>
               {errors.location && <p className="pm-field__error" style={{ marginTop: '4px' }}>{errors.location}</p>}

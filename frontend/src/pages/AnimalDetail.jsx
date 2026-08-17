@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -288,7 +289,7 @@ export default function AnimalDetail() {
           <div className="pm-animal-detail__side">
             {submitted ? (
               <div className="pm-animal-detail__done">
-                <span aria-hidden="true">✅</span>
+                <CheckCircle2 size="1em" aria-hidden="true" />
                 <h3>Request sent</h3>
                 <p>
                   We've passed your interest in {animal.name} to the team. They'll reach
