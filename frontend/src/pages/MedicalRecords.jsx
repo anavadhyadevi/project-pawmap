@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Navigate } from 'react-router-dom'
+import { PawPrint } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -128,7 +129,7 @@ export default function MedicalRecords() {
                       <img src={a.photo} alt={a.name || a.species} className="pm-mr-card__photo" />
                     ) : (
                       <div className="pm-mr-card__photo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e5e7eb', fontSize: 24 }}>
-                        🐾
+                        <PawPrint size={24} aria-hidden="true" />
                       </div>
                     )}
                     <div className="pm-mr-card__info">

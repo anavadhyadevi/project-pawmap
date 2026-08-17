@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HeartPulse, PawPrint, Siren } from 'lucide-react'
 import { Link, useNavigate, Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -7,9 +8,9 @@ import './auth.css'
 
 // UI value -> backend ROLE_CHOICES value
 const ROLES = [
-  { value: 'Reporter', label: 'User', icon: '🐾' },
-  { value: 'Volunteer', label: 'Volunteer', icon: '🚑' },
-  { value: 'NGO_Admin', label: 'NGO', icon: '🏥' },
+  { value: 'Reporter', label: 'User', Icon: PawPrint },
+  { value: 'Volunteer', label: 'Volunteer', Icon: Siren },
+  { value: 'NGO_Admin', label: 'NGO', Icon: HeartPulse },
 ]
 
 export default function Signup() {
@@ -135,7 +136,7 @@ export default function Signup() {
                 className={`pm-role-option ${role === r.value ? 'pm-role-option--active' : ''}`}
                 onClick={() => setRole(r.value)}
               >
-                <span className="pm-role-option__icon" aria-hidden="true">{r.icon}</span>
+                <span className="pm-role-option__icon" aria-hidden="true"><r.Icon size="1em" /></span>
                 {r.label}
               </button>
             ))}

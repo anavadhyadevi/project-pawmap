@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { MapPin, PawPrint } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import './lostFound.css'
@@ -81,7 +82,7 @@ export default function LostFound() {
                       <img src={item.photo} alt={item.pet_name || item.species} loading="lazy"/>
                     ) : (
                       <div style={{ width: '100%', height: 180, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>
-                        🐾
+                        <PawPrint size={40} aria-hidden="true" />
                       </div>
                     )}
                     <span className="pm-lf-card__id">
@@ -97,7 +98,7 @@ export default function LostFound() {
                       {item.species} · {item.breed || 'Unknown breed'}
                     </p>
                     <p className="pm-lf-card__meta">
-                      📍 {item.last_seen_location || item.found_location} ·{' '}
+                      <MapPin size="1em" aria-hidden="true" /> {item.last_seen_location || item.found_location} ·{' '}
                       {tab === 'lost'
                         ? `Last seen ${item.last_seen_date}`
                         : `Found ${item.found_date}`}

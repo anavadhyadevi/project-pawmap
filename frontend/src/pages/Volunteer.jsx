@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { CheckCircle2, Clock, Handshake, MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -21,9 +22,9 @@ const STEPS = [
 ]
 
 const EXPECTATIONS = [
-  { icon: '🕒', label: 'A few hours a week', body: 'Respond to cases whenever you\u2019re free — no fixed shifts.' },
-  { icon: '📍', label: 'Cases near you', body: 'You only see reports within the radius you set.' },
-  { icon: '🤝', label: 'Backed by an NGO', body: 'Every claim is visible to your partner NGO for support and follow-up.' },
+  { Icon: Clock, label: 'A few hours a week', body: 'Respond to cases whenever you\u2019re free — no fixed shifts.' },
+  { Icon: MapPin, label: 'Cases near you', body: 'You only see reports within the radius you set.' },
+  { Icon: Handshake, label: 'Backed by an NGO', body: 'Every claim is visible to your partner NGO for support and follow-up.' },
 ]
 
 export default function Volunteer() {
@@ -104,7 +105,7 @@ export default function Volunteer() {
           <div className="container-pm">
             {alreadyVolunteer ? (
               <div className="pm-vol-apply__card pm-vol-apply__card--status">
-                <span aria-hidden="true">{pendingReview ? '⏳' : '✅'}</span>
+                <span aria-hidden="true">{pendingReview ? <Clock size="1em" /> : <CheckCircle2 size="1em" />}</span>
                 <h3>{pendingReview ? 'Your application is under review' : "You're a verified volunteer"}</h3>
                 <p>
                   {pendingReview
@@ -117,7 +118,7 @@ export default function Volunteer() {
               </div>
             ) : applied ? (
               <div className="pm-vol-apply__card pm-vol-apply__card--status">
-                <span aria-hidden="true">⏳</span>
+                <span aria-hidden="true"><Clock size="1em" /></span>
                 <h3>Application submitted</h3>
                 <p>
                   Thanks, {user.full_name.split(' ')[0]} — we've logged your interest in volunteering.
@@ -193,7 +194,7 @@ export default function Volunteer() {
         <div className="container-pm pm-vol-expect__grid">
           {EXPECTATIONS.map((e) => (
             <div key={e.label} className="pm-vol-expect__card">
-              <span className="pm-vol-expect__icon" aria-hidden="true">{e.icon}</span>
+              <span className="pm-vol-expect__icon" aria-hidden="true"><e.Icon size="1em" /></span>
               <h3>{e.label}</h3>
               <p>{e.body}</p>
             </div>

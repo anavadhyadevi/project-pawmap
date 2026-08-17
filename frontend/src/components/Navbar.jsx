@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { Camera, PawPrint } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import './navbar.css'
 
@@ -64,7 +65,7 @@ export default function Navbar({ variant = 'light' }) {
     <header className={`pm-nav ${isDark ? 'pm-nav--dark' : 'pm-nav--light'}`}>
       <div className="container-pm pm-nav__inner">
         <Link to={brandHref} className="pm-nav__brand">
-          <span className="pm-nav__brand-mark" aria-hidden="true">🐾</span>
+          <span className="pm-nav__brand-mark" aria-hidden="true"><PawPrint size="1em" /></span>
           PawMap
         </Link>
 
@@ -98,7 +99,7 @@ export default function Navbar({ variant = 'light' }) {
           )}
           {showReportCta && (
             <Link to="/report" className="btn-pm btn-pm--orange">
-              <span aria-hidden="true">📷</span> Report a Stray
+              <Camera size="1em" aria-hidden="true" /> Report a Stray
             </Link>
           )}
         </div>

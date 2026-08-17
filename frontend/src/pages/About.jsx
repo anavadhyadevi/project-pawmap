@@ -1,21 +1,22 @@
 import { Link } from 'react-router-dom'
+import { Camera, Handshake, MapPin, TrendingUp } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import './about.css'
 
 const VALUES = [
   {
-    icon: '📍',
+    Icon: MapPin,
     title: 'Every report matters',
     body: 'No case is too small to log — a scared kitten and a hit-by-vehicle dog get the same urgency of response.',
   },
   {
-    icon: '🤝',
+    Icon: Handshake,
     title: 'Community first',
     body: 'Reporters, volunteers, vets, and NGOs work off the same live picture instead of scattered phone calls.',
   },
   {
-    icon: '📈',
+    Icon: TrendingUp,
     title: 'Transparent outcomes',
     body: 'Every case is tracked from report to resolution, so nothing quietly falls through the cracks.',
   },
@@ -68,7 +69,7 @@ export default function About() {
           <div className="pm-about-values__grid">
             {VALUES.map((v) => (
               <div key={v.title} className="pm-about-value">
-                <span className="pm-about-value__icon" aria-hidden="true">{v.icon}</span>
+                <span className="pm-about-value__icon" aria-hidden="true"><v.Icon size="1em" /></span>
                 <h3>{v.title}</h3>
                 <p>{v.body}</p>
               </div>
@@ -83,7 +84,7 @@ export default function About() {
           <p>Report a stray in your neighbourhood, or join as a volunteer.</p>
           <div className="pm-about-cta__actions">
             <Link to="/report" className="btn-pm btn-pm--orange">
-              <span aria-hidden="true">📷</span> Report a Stray
+              <Camera size="1em" aria-hidden="true" /> Report a Stray
             </Link>
             <Link to="/volunteer" className="btn-pm btn-pm--outline-light">
               Become a Volunteer
