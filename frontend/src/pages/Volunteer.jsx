@@ -29,6 +29,9 @@ const EXPECTATIONS = [
 
 export default function Volunteer() {
   const { user, isLoggedIn, loading } = useAuth()
+  const [form, setForm] = useState({ availability: '', experience: '', reason: '' })
+  const [submitting, setSubmitting] = useState(false)
+  const [applied, setApplied] = useState(false)
 
   if (loading) return null
 
@@ -42,10 +45,6 @@ export default function Volunteer() {
   if (isLoggedIn && user.role === 'Volunteer') {
     return <Navigate to="/volunteer/dashboard" replace />
   }
-  const [form, setForm] = useState({ availability: '', experience: '', reason: '' })
-  const [submitting, setSubmitting] = useState(false)
-  const [applied, setApplied] = useState(false)
-
   function update(name, value) {
     setForm((f) => ({ ...f, [name]: value }))
   }

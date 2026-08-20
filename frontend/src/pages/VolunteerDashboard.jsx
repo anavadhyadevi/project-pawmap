@@ -135,10 +135,9 @@ export default function VolunteerDashboard() {
     return () => clearInterval(interval)
   }, [fetchCases, fetchVrsScore])
 
-  if (authLoading) return null
-  if (!isLoggedIn) return <Navigate to="/login" replace />
-  if (user?.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
-
+  // Hooks must run in the same order on every render. Authentication is
+  // restored asynchronously after a refresh, so this needs to be above the
+  // auth/loading returns below.
   const feed = useMemo(
     () =>
       cases
@@ -153,6 +152,10 @@ export default function VolunteerDashboard() {
         .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt)),
     [cases, severityFilter]
   )
+
+  if (authLoading) return null
+  if (!isLoggedIn) return <Navigate to="/login" replace />
+  if (user?.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
 
   const myCases    = cases.filter((c) => c.status === 'in_progress' && c.volunteerId === user?.id)
   const activeWards = new Set(myCases.map((c) => c.ward))
