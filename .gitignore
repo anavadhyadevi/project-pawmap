@@ -4,3 +4,7 @@ __pycache__/
 db.sqlite3 
 .env 
 media/ 
+
+venv-py311-backup/
+*.pyc
+node_modules/

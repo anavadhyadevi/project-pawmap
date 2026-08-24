@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
@@ -16,9 +17,19 @@ import Analytics from './pages/Analytics.jsx'
 import LostFound from './pages/LostFound.jsx'
 import ReportLostFound from './pages/ReportLostFound.jsx'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
@@ -35,6 +46,7 @@ export default function App() {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/lost-found" element={<LostFound />} />
       <Route path="/lost-found/report" element={<ReportLostFound />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }

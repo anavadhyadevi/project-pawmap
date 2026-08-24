@@ -104,6 +104,7 @@ export default function Home() {
   const { user, isLoggedIn, accessToken, loading: authLoading } = useAuth()
   const [myCases, setMyCases]   = useState([])
   const [loading, setLoading]   = useState(false)
+  const [expandedCaseId, setExpandedCaseId] = useState(null)
 
   useEffect(() => {
     if (!isLoggedIn || !accessToken) return
@@ -177,6 +178,40 @@ export default function Home() {
             )}
             {!loading && myCases.length > 0 && (
               <>
+                {/* Map first — shows all case pins at a glance */}
+                <div style={{ height: '350px', width: '100%', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb', zIndex: 1, marginBottom: 24 }}>
+                  <MapContainer
+                    center={[12.9716, 77.5946]}
+                    zoom={12}
+                    maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    {myCases
+                      .filter(c => c.latitude && c.longitude)
+                      .map(c => (
+                        <Marker
+                          key={c.case_id}
+                          position={[parseFloat(c.latitude), parseFloat(c.longitude)]}
+                          icon={createStatusIcon(c.status)}
+                        >
+                          <Popup>
+                            <div style={{ fontSize: '13px' }}>
+                              <strong>{c.case_id}</strong><br />
+                              <strong>Species:</strong> {c.species}<br />
+                              <strong>Status:</strong> {c.status.replace('_', ' ')}<br />
+                              {c.ward_name && <><strong>Ward:</strong> {c.ward_name}</>}
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                  </MapContainer>
+                </div>
+
+                {/* Case list below the map */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
                   {myCases.map((c, i) => {
                     const s = STATUS_COLOUR[c.status] || STATUS_COLOUR['Open']
@@ -216,41 +251,22 @@ export default function Home() {
                         }}>
                           {s.label}
                         </span>
+                        <button type="button" onClick={() => setExpandedCaseId(expandedCaseId === c.case_id ? null : c.case_id)} style={{ border: 'none', background: 'none', color: '#2563eb', textDecoration: 'underline', cursor: 'pointer' }}>
+                          {expandedCaseId === c.case_id ? 'Hide timeline' : 'View timeline'}
+                        </button>
+                        {expandedCaseId === c.case_id && (
+                          <div style={{ width: '100%', borderTop: '1px solid #e5e7eb', paddingTop: 12, fontSize: 13, color: '#374151' }}>
+                            <strong>Status history</strong>
+                            {(c.status_logs || []).length === 0 ? <p style={{ marginTop: 6 }}>No status updates yet.</p> : (
+                              <ol style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                                {c.status_logs.map((log) => <li key={log.log_id}>{log.old_status ? `${log.old_status.replace('_', ' ')} → ` : ''}{log.new_status.replace('_', ' ')} · {new Date(log.changed_at).toLocaleString()}{log.note ? ` — ${log.note}` : ''}</li>)}
+                              </ol>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
-                </div>
-
-                <div style={{ height: '350px', width: '100%', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb', zIndex: 1 }}>
-                  <MapContainer
-                    center={[12.9716, 77.5946]}
-                    zoom={12}
-                    maxBounds={[[12.7, 77.3], [13.2, 77.9]]}
-                    style={{ height: '100%', width: '100%' }}
-                  >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                    {myCases
-                      .filter(c => c.latitude && c.longitude)
-                      .map(c => (
-                        <Marker
-                          key={c.case_id}
-                          position={[parseFloat(c.latitude), parseFloat(c.longitude)]}
-                          icon={createStatusIcon(c.status)}
-                        >
-                          <Popup>
-                            <div style={{ fontSize: '13px' }}>
-                              <strong>{c.case_id}</strong><br />
-                              <strong>Species:</strong> {c.species}<br />
-                              <strong>Status:</strong> {c.status.replace('_', ' ')}<br />
-                              {c.ward_name && <><strong>Ward:</strong> {c.ward_name}</>}
-                            </div>
-                          </Popup>
-                        </Marker>
-                      ))}
-                  </MapContainer>
                 </div>
               </>
             )}

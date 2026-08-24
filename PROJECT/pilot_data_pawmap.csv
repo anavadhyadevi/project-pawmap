@@ -1,0 +1,101 @@
+case_id,timestamp_utc,latitude,longitude,ward_name,species,animal_name,estimated_age,severity,injury_type,aggression_level,bystander_action,reporter_age_group,reporter_prior_exp,volunteer_id,response_time_min,resolution_status,animal_id
+CASE-0001,2026-01-01T01:53:30Z,12.951223,77.70215,Marathahalli,Cat,Indian domestic cat,Kitten,2,small tick infestation,3,none,36-50,no,VOL-004,9.0,Resolved,ANIM-0016
+CASE-0002,2026-01-05T02:01:36Z,13.028446,77.585665,Hebbal,Cat,Indian domestic cat,Senior,1,"appears healthy, needs shelter",2,fed,26-35,yes,VOL-004,17.8,Resolved,ANIM-0006
+CASE-0003,2026-01-05T03:31:58Z,12.910242,77.61779,BTM Layout,Dog,German Shepherd mix,Adult,1,no visible injury - healthy stray,4,fed,18-25,no,VOL-006,5.6,Resolved,ANIM-0042
+CASE-0004,2026-01-06T05:32:54Z,12.934565,77.574595,Basavanagudi,Dog,Indie dog,Adult,1,malnourished but mobile,3,contacted_ngo,50+,no,,,Unresolved,
+CASE-0005,2026-01-08T10:30:20Z,12.912706,77.607921,BTM Layout,Dog,German Shepherd mix,Puppy,1,no visible injury - healthy stray,2,none,50+,no,VOL-014,12.8,Resolved,ANIM-0057
+CASE-0006,2026-01-08T17:45:52Z,12.970863,77.52377,Vijayanagar,Dog,German Shepherd mix,Puppy,2,eye discharge,3,none,26-35,no,,,Unresolved,
+CASE-0007,2026-01-12T07:51:31Z,12.944762,77.578631,Basavanagudi,Dog,Indie dog,Adult,1,"underweight, roaming freely",2,contacted_ngo,18-25,no,,,Unresolved,
+CASE-0008,2026-01-14T09:21:42Z,12.942589,77.578907,Basavanagudi,Goat,Injured goat,Adult,2,minor skin abrasion,3,fed,18-25,no,VOL-006,1.0,Resolved,ANIM-0023
+CASE-0009,2026-01-20T06:12:18Z,12.907982,77.646319,HSR Layout,Cat,Indian domestic cat,Kitten,1,"appears healthy, needs shelter",2,fed,26-35,no,,,Unresolved,
+CASE-0010,2026-01-21T09:04:18Z,12.990557,77.59882,Shivajinagar,Dog,Indie dog,Adult,2,small tick infestation,3,none,18-25,no,,,Unresolved,
+CASE-0011,2026-01-21T15:54:37Z,12.914763,77.644169,HSR Layout,Dog,Labrador mix,Adult,1,no visible injury - healthy stray,5,contacted_ngo,18-25,no,,,Unresolved,
+CASE-0012,2026-01-22T17:20:28Z,12.958375,77.700727,Marathahalli,Cat,Indian domestic cat,Kitten,1,malnourished but mobile,3,contacted_ngo,26-35,yes,,,Unresolved,
+CASE-0013,2026-01-23T07:24:15Z,12.975002,77.642125,Indiranagar,Dog,Spitz mix,Adult,1,malnourished but mobile,1,fed,18-25,yes,,,Unresolved,
+CASE-0014,2026-01-24T06:42:43Z,12.929855,77.672174,Bellandur,Cat,Indian domestic cat,Kitten,5,critical - unconscious,4,none,36-50,yes,VOL-010,1.1,Resolved,ANIM-0009
+CASE-0015,2026-01-25T04:47:45Z,13.046956,77.644921,Hennur,Cow,Calf,Senior,3,suspected limb fracture,3,none,36-50,no,VOL-005,8.5,Resolved,ANIM-0015
+CASE-0016,2026-01-26T05:48:26Z,12.9201,77.593649,Jayanagar,Bird,Injured pigeon,Adult,1,malnourished but mobile,2,none,36-50,yes,VOL-013,3.8,Resolved,ANIM-0043
+CASE-0017,2026-01-31T04:26:23Z,12.934574,77.683333,Bellandur,Dog,Indie dog,Adult,1,no visible injury - healthy stray,4,none,18-25,yes,VOL-010,4.7,Resolved,ANIM-0011
+CASE-0018,2026-02-01T01:34:12Z,12.978944,77.525363,Vijayanagar,Dog,Spitz mix,Adult,1,malnourished but mobile,2,none,50+,yes,,,Unresolved,
+CASE-0019,2026-02-05T07:26:06Z,12.954861,77.760529,Whitefield,Dog,Labrador mix,Adult,1,"underweight, roaming freely",2,contacted_ngo,26-35,no,VOL-006,32.0,Resolved,
+CASE-0020,2026-02-05T19:11:49Z,13.043266,77.639571,Hennur,Dog,Indie dog,Puppy,2,small tick infestation,1,none,36-50,no,VOL-014,10.4,Resolved,ANIM-0027
+CASE-0021,2026-02-07T06:48:33Z,12.922518,77.683855,Bellandur,Dog,Indie dog,Senior,2,eye discharge,1,none,18-25,yes,VOL-003,2.7,Resolved,ANIM-0054
+CASE-0022,2026-02-07T07:11:12Z,12.985226,77.547212,Rajajinagar,Dog,Indian pariah dog,Senior,2,early-stage mange,3,contacted_ngo,26-35,no,VOL-012,12.2,Resolved,
+CASE-0023,2026-02-15T23:16:33Z,12.98299,77.649515,Indiranagar,Dog,Indian pariah dog,Senior,1,no visible injury - healthy stray,2,fed,26-35,no,,,Unresolved,
+CASE-0024,2026-02-17T07:52:06Z,13.107703,77.607486,Yelahanka,Dog,Indie dog,Puppy,2,early-stage mange,2,contacted_ngo,18-25,no,VOL-003,7.7,Escalated,ANIM-0031
+CASE-0025,2026-02-20T12:24:58Z,13.010337,77.564635,Malleshwaram,Cat,Stray cat,Adult,2,early-stage mange,1,fed,26-35,yes,VOL-004,9.7,Resolved,
+CASE-0026,2026-02-21T11:56:08Z,12.922337,77.593677,Jayanagar,Pig,Stray pig,Adult,2,small tick infestation,1,none,18-25,yes,,,Unresolved,
+CASE-0027,2026-02-22T02:24:14Z,13.013547,77.691718,KR Puram,Dog,Labrador mix,Adult,3,moderate mange,3,contacted_ngo,26-35,no,VOL-011,19.2,Resolved,ANIM-0021
+CASE-0028,2026-02-25T19:16:59Z,13.037634,77.645426,Hennur,Dog,Labrador mix,Adult,3,moderate mange,4,none,36-50,yes,VOL-007,46.0,Resolved,ANIM-0033
+CASE-0029,2026-03-01T12:58:00Z,12.964554,77.748612,Whitefield,Dog,Indie dog,Adult,1,"appears healthy, needs shelter",2,contacted_ngo,36-50,no,VOL-002,25.6,Resolved,ANIM-0026
+CASE-0030,2026-03-02T05:47:04Z,12.959927,77.711002,Marathahalli,Dog,Indie dog,Adult,5,advanced maggot wound,4,none,18-25,no,,,Unresolved,
+CASE-0031,2026-03-05T09:47:39Z,12.963019,77.527621,Vijayanagar,Cat,Tabby cat,Kitten,1,no visible injury - healthy stray,1,none,18-25,no,VOL-003,9.6,Resolved,ANIM-0049
+CASE-0032,2026-03-07T05:09:46Z,12.975406,77.742035,Whitefield,Cat,Tabby cat,Senior,3,moderate mange,3,none,26-35,yes,VOL-009,1.0,Resolved,ANIM-0019
+CASE-0033,2026-03-15T01:11:34Z,12.907835,77.61561,BTM Layout,Dog,Indian pariah dog,Puppy,2,small tick infestation,1,contacted_ngo,36-50,yes,VOL-006,2.7,Resolved,ANIM-0047
+CASE-0034,2026-03-16T01:17:11Z,12.923067,77.607133,BTM Layout,Cat,Tabby cat,Adult,5,electrocution suspected,2,none,18-25,no,VOL-010,1.4,Resolved,ANIM-0036
+CASE-0035,2026-03-18T20:24:23Z,12.991955,77.556527,Rajajinagar,Cat,Kitten,Senior,4,suspected hit by vehicle - cannot bear weight,3,none,18-25,no,VOL-004,3.2,Resolved,ANIM-0050
+CASE-0036,2026-03-19T18:14:33Z,13.008648,77.686917,KR Puram,Dog,German Shepherd mix,Adult,2,eye discharge,3,none,26-35,no,VOL-008,1.5,Resolved,ANIM-0030
+CASE-0037,2026-03-22T10:14:10Z,12.969328,77.535356,Vijayanagar,Cat,Stray cat,Kitten,1,no visible injury - healthy stray,3,none,26-35,no,VOL-013,14.4,Resolved,ANIM-0048
+CASE-0038,2026-03-22T11:26:06Z,12.979492,77.737185,Whitefield,Cow,Injured cow,Adult,3,suspected limb fracture,1,none,26-35,no,,,Unresolved,
+CASE-0039,2026-03-24T01:31:33Z,13.050211,77.632832,Hennur,Dog,Indie dog,Adult,3,moderate mange,2,fed,26-35,yes,VOL-003,2.9,Resolved,ANIM-0001
+CASE-0040,2026-03-24T20:45:21Z,12.94767,77.583056,Basavanagudi,Dog,Indian pariah dog,Adult,2,minor ear infection,3,contacted_ngo,26-35,no,VOL-015,2.8,Resolved,ANIM-0018
+CASE-0041,2026-03-26T05:52:11Z,13.053727,77.632536,Hennur,Dog,Indie dog,Adult,3,severe tick infestation,1,none,18-25,no,VOL-006,32.0,Resolved,ANIM-0056
+CASE-0042,2026-03-27T20:03:36Z,12.901698,77.584967,JP Nagar,Cat,Stray cat,Adult,4,severe mange - thickened skin,3,none,26-35,no,VOL-009,1.1,Resolved,
+CASE-0043,2026-04-02T08:41:33Z,12.977644,77.6041,Shivajinagar,Dog,Stray dog,Puppy,1,no visible injury - healthy stray,5,contacted_ngo,18-25,no,VOL-008,49.6,Resolved,ANIM-0029
+CASE-0044,2026-04-03T11:28:01Z,12.927626,77.632896,Koramangala,Dog,Indian pariah dog,Adult,1,malnourished but mobile,2,none,50+,no,VOL-006,14.4,Resolved,ANIM-0044
+CASE-0045,2026-04-04T07:42:53Z,13.108698,77.583357,Yelahanka,Dog,Labrador mix,Senior,1,"underweight, roaming freely",5,none,36-50,yes,,,Unresolved,
+CASE-0046,2026-04-08T12:50:47Z,12.977907,77.63174,Indiranagar,Dog,Indie dog,Adult,3,moderate mange,2,fed,36-50,yes,,,Unresolved,
+CASE-0047,2026-04-14T03:24:52Z,12.939747,77.56962,Basavanagudi,Dog,Indian pariah dog,Senior,1,no visible injury - healthy stray,1,none,26-35,no,VOL-011,31.5,Resolved,ANIM-0034
+CASE-0048,2026-04-14T14:50:20Z,13.105462,77.593672,Yelahanka,Dog,German Shepherd mix,Adult,2,mild limping,5,fed,26-35,no,VOL-014,3.5,Resolved,ANIM-0055
+CASE-0049,2026-04-15T04:36:29Z,13.008814,77.561278,Malleshwaram,Pig,Stray pig,Adult,3,moderate mange,4,fed,26-35,yes,VOL-006,13.4,Resolved,ANIM-0039
+CASE-0050,2026-04-15T06:27:47Z,12.929297,77.552361,Banashankari,Cat,Stray cat,Adult,1,"underweight, roaming freely",3,fed,18-25,no,,,Unresolved,
+CASE-0051,2026-04-17T12:34:06Z,12.967294,77.76084,Whitefield,Dog,Indian pariah dog,Adult,2,small tick infestation,1,fed,18-25,yes,,,Unresolved,
+CASE-0052,2026-04-19T08:17:49Z,12.986362,77.552253,Rajajinagar,Dog,Labrador mix,Adult,1,"appears healthy, needs shelter",3,none,36-50,no,,,Unresolved,
+CASE-0053,2026-04-23T11:10:32Z,13.093714,77.607186,Yelahanka,Dog,German Shepherd mix,Senior,4,visible broken limb,3,fed,18-25,yes,VOL-001,11.0,Resolved,ANIM-0008
+CASE-0054,2026-04-23T13:00:34Z,12.83465,77.675343,Electronic City,Cow,Calf,Senior,2,mild limping,3,fed,36-50,yes,VOL-003,1.5,Resolved,ANIM-0038
+CASE-0055,2026-04-24T12:31:40Z,12.998657,77.566971,Malleshwaram,Dog,Labrador mix,Senior,3,moderate mange,2,fed,18-25,yes,,,Unresolved,
+CASE-0056,2026-04-25T01:12:15Z,13.008716,77.692965,KR Puram,Dog,Stray dog,Adult,4,severe laceration with infection,2,none,36-50,no,VOL-003,17.3,Resolved,ANIM-0041
+CASE-0057,2026-04-26T13:06:22Z,12.961312,77.539438,Vijayanagar,Cow,Stray cow,Adult,1,malnourished but mobile,3,none,18-25,yes,,,Unresolved,
+CASE-0058,2026-04-28T21:58:42Z,13.008338,77.564356,Malleshwaram,Dog,Indian pariah dog,Adult,2,minor ear infection,4,fed,36-50,no,,,Unresolved,
+CASE-0059,2026-04-30T10:08:48Z,12.934014,77.685816,Bellandur,Dog,Labrador mix,Adult,2,minor skin abrasion,2,none,18-25,no,VOL-007,9.9,Resolved,ANIM-0052
+CASE-0060,2026-05-02T09:04:41Z,13.000704,77.552111,Rajajinagar,Bird,Kite,Adult,3,deep laceration requiring stitches,2,fed,36-50,no,VOL-011,4.3,Resolved,ANIM-0051
+CASE-0061,2026-05-03T01:40:25Z,12.889734,77.58045,JP Nagar,Dog,Labrador mix,Adult,2,minor skin abrasion,3,fed,18-25,no,VOL-014,7.2,Resolved,ANIM-0002
+CASE-0062,2026-05-03T03:52:05Z,13.088205,77.595402,Yelahanka,Dog,German Shepherd mix,Senior,1,"underweight, roaming freely",3,contacted_ngo,18-25,no,,,Unresolved,
+CASE-0063,2026-05-04T17:09:48Z,12.826099,77.684591,Electronic City,Cat,Kitten,Adult,4,suspected hit by vehicle - cannot bear weight,2,none,26-35,yes,VOL-008,6.4,Resolved,ANIM-0012
+CASE-0064,2026-05-05T07:16:35Z,12.914586,77.613088,BTM Layout,Dog,German Shepherd mix,Senior,1,no visible injury - healthy stray,2,none,26-35,no,VOL-002,10.4,Unresolved,
+CASE-0065,2026-05-06T08:15:06Z,12.918375,77.539141,Banashankari,Cow,Calf,Adult,2,eye discharge,2,contacted_ngo,26-35,no,VOL-006,42.3,Escalated,ANIM-0010
+CASE-0066,2026-05-06T10:07:32Z,12.847229,77.682337,Electronic City,Cat,Stray cat,Adult,4,suspected hit by vehicle - cannot bear weight,2,none,26-35,no,VOL-008,12.6,Resolved,ANIM-0025
+CASE-0067,2026-05-07T13:23:48Z,12.832278,77.664921,Electronic City,Pig,Piglet,Adult,3,moderate mange,1,fed,18-25,no,VOL-001,35.9,Resolved,ANIM-0022
+CASE-0068,2026-05-09T02:39:42Z,12.956785,77.692018,Marathahalli,Dog,Stray dog,Adult,4,suspected hit by vehicle - cannot bear weight,1,fed,18-25,no,VOL-009,1.4,Resolved,ANIM-0005
+CASE-0069,2026-05-11T02:29:17Z,12.935046,77.584357,Jayanagar,Dog,Stray dog,Adult,1,"appears healthy, needs shelter",3,fed,18-25,no,VOL-006,41.4,Escalated,ANIM-0046
+CASE-0070,2026-05-11T03:14:33Z,12.95888,77.745658,Whitefield,Bird,Owl,Juvenile,3,open wound on leg,2,fed,36-50,no,VOL-015,13.8,Resolved,ANIM-0003
+CASE-0071,2026-05-12T22:47:02Z,12.952428,77.701226,Marathahalli,Dog,Indian pariah dog,Puppy,2,small tick infestation,2,none,50+,no,VOL-001,2.0,Unresolved,
+CASE-0072,2026-05-15T15:48:35Z,12.973398,77.536472,Vijayanagar,Dog,German Shepherd mix,Adult,5,advanced maggot wound,3,fed,36-50,yes,VOL-003,1.3,Resolved,
+CASE-0073,2026-05-19T12:11:06Z,12.984219,77.647748,Indiranagar,Dog,Spitz mix,Adult,1,"underweight, roaming freely",2,none,26-35,yes,VOL-012,11.5,Resolved,ANIM-0053
+CASE-0074,2026-05-22T08:20:26Z,12.947894,77.574177,Basavanagudi,Cow,Calf,Senior,2,mild limping,3,none,26-35,no,VOL-006,49.1,Resolved,ANIM-0045
+CASE-0075,2026-05-24T10:56:22Z,12.902743,77.592237,JP Nagar,Dog,Spitz mix,Senior,4,multiple wounds,3,fed,26-35,yes,,,Unresolved,
+CASE-0076,2026-05-28T09:54:23Z,12.936123,77.569752,Basavanagudi,Cat,Indian domestic cat,Senior,1,malnourished but mobile,2,none,18-25,yes,,,Unresolved,
+CASE-0077,2026-05-29T02:36:45Z,12.936122,77.669183,Bellandur,Dog,German Shepherd mix,Adult,1,"underweight, roaming freely",2,fed,18-25,no,VOL-004,6.1,Resolved,ANIM-0028
+CASE-0078,2026-05-30T04:36:02Z,13.037271,77.636783,Hennur,Horse,Injured horse,Adult,2,eye discharge,5,fed,36-50,no,,,Unresolved,
+CASE-0079,2026-05-30T11:30:29Z,13.009658,77.56879,Malleshwaram,Goat,Stray goat,Kid,2,eye discharge,2,none,18-25,yes,VOL-012,1.0,Escalated,ANIM-0020
+CASE-0080,2026-05-31T06:07:35Z,13.006613,77.690158,KR Puram,Dog,Spitz mix,Puppy,4,suspected hit by vehicle - cannot bear weight,2,none,36-50,no,VOL-007,8.1,Resolved,ANIM-0058
+CASE-0081,2026-05-31T10:05:26Z,12.926782,77.558071,Banashankari,Dog,Indie dog,Adult,3,moderate mange,2,fed,36-50,no,VOL-007,21.0,Resolved,ANIM-0024
+CASE-0082,2026-05-31T15:12:53Z,12.906322,77.593865,JP Nagar,Dog,Stray dog,Adult,4,suspected internal injury,5,fed,50+,no,VOL-010,13.0,Resolved,ANIM-0037
+CASE-0083,2026-06-01T18:10:18Z,12.919339,77.634646,HSR Layout,Dog,German Shepherd mix,Puppy,2,small tick infestation,1,none,26-35,no,VOL-012,8.1,Resolved,ANIM-0032
+CASE-0084,2026-06-02T08:55:52Z,12.996836,77.55087,Rajajinagar,Dog,Stray dog,Adult,3,severe tick infestation,3,none,36-50,no,VOL-008,3.0,Resolved,ANIM-0013
+CASE-0085,2026-06-03T13:07:09Z,12.930818,77.585339,Jayanagar,Cat,Stray cat,Kitten,1,"appears healthy, needs shelter",1,none,18-25,no,,,Unresolved,
+CASE-0086,2026-06-04T14:11:55Z,12.91492,77.580022,Jayanagar,Cow,Stray cow,Adult,1,"appears healthy, needs shelter",3,none,26-35,yes,,,Unresolved,
+CASE-0087,2026-06-06T05:51:42Z,12.893617,77.574207,JP Nagar,Cat,Indian domestic cat,Adult,4,severe laceration with infection,2,fed,18-25,no,VOL-005,9.1,Resolved,ANIM-0035
+CASE-0088,2026-06-06T14:30:31Z,12.999109,77.565772,Rajajinagar,Dog,Indian pariah dog,Adult,4,multiple wounds,3,none,18-25,no,VOL-014,3.3,Resolved,
+CASE-0089,2026-06-07T02:25:01Z,12.93329,77.683964,Bellandur,Bird,Injured crow,Adult,1,malnourished but mobile,2,none,18-25,yes,,,Unresolved,
+CASE-0090,2026-06-09T13:19:39Z,12.910427,77.606264,BTM Layout,Dog,Indie dog,Adult,2,minor ear infection,4,fed,26-35,no,VOL-002,2.4,Escalated,ANIM-0040
+CASE-0091,2026-06-11T06:39:59Z,12.982912,77.594524,Shivajinagar,Cat,Stray cat,Kitten,2,minor ear infection,2,none,18-25,no,,,Unresolved,
+CASE-0092,2026-06-11T06:44:39Z,12.983363,77.558026,Rajajinagar,Dog,Stray dog,Adult,1,"appears healthy, needs shelter",2,none,26-35,no,,,Unresolved,
+CASE-0093,2026-06-13T09:14:04Z,13.005254,77.682237,KR Puram,Dog,Stray dog,Adult,2,mild limping,3,none,36-50,yes,,,Unresolved,
+CASE-0094,2026-06-16T05:18:34Z,13.092209,77.591957,Yelahanka,Cat,Kitten,Adult,1,"underweight, roaming freely",2,none,18-25,no,,,Unresolved,
+CASE-0095,2026-06-16T12:14:27Z,13.038915,77.635785,Hennur,Dog,Indian pariah dog,Puppy,2,early-stage mange,3,none,18-25,yes,,,Unresolved,
+CASE-0096,2026-06-21T08:12:11Z,12.972285,77.633646,Indiranagar,Dog,Stray dog,Puppy,3,open wound on leg,3,none,36-50,no,VOL-008,3.3,Resolved,ANIM-0007
+CASE-0097,2026-06-21T08:14:01Z,12.979639,77.54093,Vijayanagar,Dog,Indie dog,Senior,1,"underweight, roaming freely",1,fed,36-50,yes,VOL-012,14.6,Resolved,ANIM-0017
+CASE-0098,2026-06-21T18:55:20Z,12.960379,77.749977,Whitefield,Dog,Labrador mix,Adult,1,malnourished but mobile,4,fed,50+,no,VOL-005,3.0,Resolved,ANIM-0004
+CASE-0099,2026-06-24T15:59:45Z,13.000653,77.547544,Rajajinagar,Cat,Tabby cat,Kitten,1,"underweight, roaming freely",2,none,26-35,no,VOL-005,1.0,Resolved,ANIM-0014
+CASE-0100,2026-06-25T02:12:32Z,12.992695,77.597877,Shivajinagar,Dog,Labrador mix,Puppy,3,suspected limb fracture,2,none,26-35,yes,,,Unresolved,

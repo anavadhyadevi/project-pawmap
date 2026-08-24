@@ -17,7 +17,7 @@ function adaptDetailedAnimal(a) {
     age: a.estimated_age || 'Adult',
     location: 'Bengaluru',
     tag: a.ownership_status || 'Stray',
-    rating: a.temperament_score ? parseFloat(a.temperament_score) : 5.0,
+    rating: a.temperament_score ? parseFloat(a.temperament_score) : null,
     photo: a.photo || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=900&auto=format&fit=crop',
     story: a.distinguishing_features || 'No details available.',
     vaccinated: false,
@@ -28,7 +28,8 @@ function adaptDetailedAnimal(a) {
       score: parseFloat(r.score),
       note: `Observed score: ${r.score}`,
       observedBy: r.volunteer_name || 'Volunteer'
-    }))
+    })),
+    medicalSummary: a.medical_summary || []
   }
 }
 
@@ -186,7 +187,7 @@ export default function AnimalDetail() {
             </div>
             <p className="pm-animal-detail__meta">{animal.age} · {animal.location}</p>
             <div className="pm-animal-card__rating pm-animal-detail__rating">
-              ★★★★★ <span>{animal.rating.toFixed(1)} / 5.0</span>
+              ★★★★★ <span>{animal.rating !== null ? `${animal.rating.toFixed(1)} / 5.0` : 'Not rated yet'}</span>
             </div>
 
             <div className="pm-animal-detail__tags">
@@ -199,6 +200,20 @@ export default function AnimalDetail() {
 
             <h2 className="pm-animal-detail__subhead">About {animal.name}</h2>
             <p className="pm-animal-detail__story">{animal.story}</p>
+
+            <h2 className="pm-animal-detail__subhead">Medical summary</h2>
+            {animal.medicalSummary.length === 0 ? (
+              <p className="pm-animal-detail__story">No medical records have been added yet.</p>
+            ) : (
+              <ul className="pm-temperament__timeline">
+                {animal.medicalSummary.map((record) => (
+                  <li key={record.record_id} className="pm-temperament__item">
+                    <div><p className="pm-temperament__item-note">{record.entry_type}: {record.details}</p>
+                      <p className="pm-temperament__item-meta">{new Date(record.timestamp).toLocaleDateString()}</p></div>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {temperamentScore !== null ? (
               <div className="pm-temperament">

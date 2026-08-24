@@ -5,22 +5,28 @@ import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { API_BASE_URL } from '../lib/api.js'
 import './volunteerAnalytics.css'
+import './analytics.css'
+import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet'
+import { MapPin } from 'lucide-react'
 
 export default function VolunteerAnalytics() {
   const { user, accessToken, isLoggedIn, loading: authLoading } = useAuth()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [hotspots, setHotspots] = useState([])
+  const [hotspotMeta, setHotspotMeta] = useState(null)
 
   const fetchStats = useCallback(async () => {
     if (!accessToken) return
     try {
-      const [vrsRes, casesRes] = await Promise.all([
+      const [vrsRes, casesRes, hotspotsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/volunteers/vrs/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }).then(r => r.json()),
         fetch(`${API_BASE_URL}/cases/my-volunteer-cases/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }).then(r => r.json()),
+        fetch(`${API_BASE_URL}/analytics/hotspots/`).then(r => r.json()),
       ])
 
       const casesList = casesRes.results ?? casesRes ?? []
@@ -58,6 +64,8 @@ export default function VolunteerAnalytics() {
         reliabilityBreakdown,
         recentCases
       })
+      setHotspots(hotspotsRes.clusters ?? [])
+      setHotspotMeta(hotspotsRes)
     } catch (err) {
       console.error(err)
     } finally {
@@ -156,6 +164,30 @@ export default function VolunteerAnalytics() {
               </table>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="pm-hotspots">
+        <div className="container-pm">
+          <p className="eyebrow pm-hotspots__eyebrow">Geospatial intelligence</p>
+          <h2 className="pm-hotspots__title">Hotspots in your coverage area.</h2>
+          <p className="pm-hotspots__sub">
+            DBSCAN clusters over reported case history, helping you understand where rescue demand is concentrated.
+            {hotspotMeta && <span style={{ display: 'block', marginTop: 6, fontSize: 12, color: '#9ca3af' }}>Last run: {hotspotMeta.run_date} · {hotspotMeta.total_cases_processed} cases processed</span>}
+          </p>
+          <div style={{ height: '380px', width: '100%', borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb', marginBottom: '28px', zIndex: 1 }}>
+            <MapContainer center={[12.9716, 77.5946]} zoom={12} maxBounds={[[12.7, 77.3], [13.2, 77.9]]} style={{ height: '100%', width: '100%' }}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors' />
+              {hotspots.map((h) => (
+                <Circle key={h.cluster_label} center={[parseFloat(h.centroid_lat), parseFloat(h.centroid_lon)]} radius={150 + h.case_count * 20} pathOptions={{ color: '#f97316', fillColor: '#f97316', fillOpacity: 0.35, weight: 2 }}>
+                  <Popup><strong>Cluster {h.cluster_label + 1}</strong><br />Cases: {h.case_count}<br />Dominant species: {h.dominant_species}</Popup>
+                </Circle>
+              ))}
+            </MapContainer>
+          </div>
+          {hotspots.length === 0 ? <p style={{ color: '#6b7280', fontSize: 13 }}>No hotspot analysis has been run yet.</p> : (
+            <div className="pm-hotspots__grid">{hotspots.map((h, i) => <div key={h.cluster_label} className="pm-hotspot-card"><span className="pm-hotspot-card__rank">#{i + 1}</span><h3>Cluster {h.cluster_label + 1}</h3><p className="pm-hotspot-card__count">{h.case_count} cases</p><div className="pm-hotspot-card__meta"><span><MapPin size="1em" aria-hidden="true" /> {Number(h.centroid_lat).toFixed(4)}, {Number(h.centroid_lon).toFixed(4)}</span><span>Mostly {h.dominant_species}</span></div></div>)}</div>
+          )}
         </div>
       </section>
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import AdoptionListing, AdopterInterest, AdoptionRecord
 from animals.serializers import AnimalSerializer
+from animals.models import Animal
 
 
 class AdopterInterestSerializer(serializers.ModelSerializer):
@@ -43,6 +44,13 @@ class AdoptionListingSerializer(serializers.ModelSerializer):
 
 
 class AdoptionListingCreateSerializer(serializers.ModelSerializer):
+    # Accept the human-readable animal_id string (e.g. 'ANIMAL-0001')
+    # instead of the internal integer PK
+    animal = serializers.SlugRelatedField(
+        slug_field='animal_id',
+        queryset=Animal.objects.all()
+    )
+
     class Meta:
         model  = AdoptionListing
-        fields = ['animal']
+        fields = ['animal']
