@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HeartPulse, PawPrint, Siren } from 'lucide-react'
 import { Link, useNavigate, Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
@@ -17,6 +17,23 @@ export default function Signup() {
   const navigate = useNavigate()
   const { login, isLoggedIn, user, loading } = useAuth()
   const [role, setRole] = useState('Reporter')
+  const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '', password2: '', ngo: '' })
+  const [ngos, setNgos] = useState([])
+  const [ngosLoading, setNgosLoading] = useState(false)
+  const [ngoForm, setNgoForm] = useState({ orgName: '', registrationNumber: '', address: '', contactPerson: '' })
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [serverError, setServerError] = useState('')
+
+  useEffect(() => {
+    if (role !== 'Volunteer') return
+    setNgosLoading(true)
+    fetch('http://localhost:8000/api/users/ngos/')
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => setNgos(data.results ?? data))
+      .catch(() => setServerError('Could not load the NGO list. Please try again.'))
+      .finally(() => setNgosLoading(false))
+  }, [role])
 
   if (loading) return null
 
@@ -29,23 +46,6 @@ export default function Signup() {
     }
     return <Navigate to="/" replace />
   }
-
-  // Shared fields (individual signup: User / Volunteer)
-  const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '', password2: '' })
-
-  // NGO-only fields — org name maps to full_name on submit; the rest are
-  // captured here but NOT yet sent to the backend (her serializer doesn't
-  // accept them yet — flag this to her when NGO onboarding gets built out).
-  const [ngoForm, setNgoForm] = useState({
-    orgName: '',
-    registrationNumber: '',
-    address: '',
-    contactPerson: '',
-  })
-
-  const [errors, setErrors] = useState({})
-  const [submitting, setSubmitting] = useState(false)
-  const [serverError, setServerError] = useState('')
 
   const isNgo = role === 'NGO_Admin'
 
@@ -69,6 +69,7 @@ export default function Signup() {
       if (!ngoForm.contactPerson.trim()) next.contactPerson = 'Enter a contact person.'
     } else {
       if (!form.fullName.trim()) next.fullName = 'Enter your full name.'
+      if (role === 'Volunteer' && !form.ngo) next.ngo = 'Choose the NGO you will work with.'
     }
 
     if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = 'Enter a valid email address.'
@@ -92,6 +93,7 @@ export default function Signup() {
           email: form.email,
           phone: form.phone,
           role,
+          ngo: role === 'Volunteer' ? Number(form.ngo) : undefined,
           password: form.password,
           password2: form.password2,
           // NOTE: registrationNumber / address / contactPerson are not yet
@@ -204,19 +206,24 @@ export default function Signup() {
                 </div>
               </>
             ) : (
-              <div className={`pm-field ${errors.fullName || errors.full_name ? 'pm-field--error' : ''}`}>
-                <label htmlFor="fullName">Full name</label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  value={form.fullName}
-                  onChange={handleChange}
-                  placeholder="Anjali Rao"
-                />
-                {(errors.fullName || errors.full_name) && (
-                  <p className="pm-field__error">{errors.fullName || errors.full_name}</p>
+              <>
+                <div className={`pm-field ${errors.fullName || errors.full_name ? 'pm-field--error' : ''}`}>
+                  <label htmlFor="fullName">Full name</label>
+                  <input id="fullName" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Anjali Rao" />
+                  {(errors.fullName || errors.full_name) && <p className="pm-field__error">{errors.fullName || errors.full_name}</p>}
+                </div>
+                {role === 'Volunteer' && (
+                  <div className={`pm-field ${errors.ngo ? 'pm-field--error' : ''}`}>
+                    <label htmlFor="ngo">Affiliated NGO</label>
+                    <select id="ngo" name="ngo" value={form.ngo} onChange={handleChange} disabled={ngosLoading}>
+                      <option value="">{ngosLoading ? 'Loading NGOs…' : 'Choose an NGO'}</option>
+                      {ngos.map((ngo) => <option key={ngo.id} value={ngo.id}>{ngo.full_name}</option>)}
+                    </select>
+                    {errors.ngo && <p className="pm-field__error">{errors.ngo}</p>}
+                    {!ngosLoading && ngos.length === 0 && <p className="pm-field__error">No NGO accounts are available yet.</p>}
+                  </div>
                 )}
-              </div>
+              </>
             )}
 
             <div className={`pm-field ${errors.email ? 'pm-field--error' : ''}`}>

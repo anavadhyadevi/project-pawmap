@@ -200,6 +200,29 @@ export default function ReportStray() {
     )
   }
 
+  // Full-screen uploading overlay — shown while API call is in flight
+  if (submitting) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(255,255,255,0.97)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 20,
+      }}>
+        {/* Spinner */}
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%',
+          border: '5px solid #e5e7eb',
+          borderTopColor: '#f97316',
+          animation: 'pm-spin 0.8s linear infinite',
+        }} />
+        <style>{`@keyframes pm-spin { to { transform: rotate(360deg); } }`}</style>
+        <p style={{ fontSize: 18, fontWeight: 600, color: '#111', margin: 0 }}>Sending your report…</p>
+        <p style={{ fontSize: 14, color: '#6b7280', margin: 0 }}>Uploading photo &amp; notifying volunteers nearby</p>
+      </div>
+    )
+  }
+
   if (submitted) {
     return (
       <div>
@@ -207,9 +230,9 @@ export default function ReportStray() {
         <div className="pm-report-done">
           <div className="pm-report-done__card">
             <span className="pm-report-done__icon" aria-hidden="true"><CheckCircle2 size="1em" /></span>
-            <h1>Report received</h1>
+            <h1>Report received! 🐾</h1>
             <p>
-              Case <strong>#{createdCaseId || 'A-0157'}</strong> has been logged. We're notifying the nearest
+              Case <strong>#{createdCaseId}</strong> has been logged. We're notifying the nearest
               verified volunteers now — you'll get updates as the case moves.
             </p>
             <div className="pm-report-done__actions">
@@ -454,8 +477,8 @@ export default function ReportStray() {
             </div>
 
             {errors.submit && <p className="pm-field__error" style={{ marginBottom: '12px' }}>{errors.submit}</p>}
-            <button type="submit" className="btn-pm btn-pm--orange btn-pm--full" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Submit report'}
+            <button type="submit" className="btn-pm btn-pm--orange btn-pm--full">
+              Submit report
             </button>
           </form>
         </div>

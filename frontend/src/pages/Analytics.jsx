@@ -3,11 +3,13 @@ import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet'
 import { MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 import './analytics.css'
 
 const API = 'http://localhost:8000/api'
 
 export default function Analytics() {
+  const { user } = useAuth()
   const [hotspotData, setHotspotData] = useState(null)
   const [casesGeo, setCasesGeo]       = useState([])
   const [loading, setLoading]         = useState(true)
@@ -42,11 +44,12 @@ export default function Analytics() {
   const noiseCount  = totalCases - clusters.reduce((s, c) => s + c.case_count, 0)
   const maxStatus   = Math.max(resolved, inProgress, open, 1)
 
+  const canViewHotspots = ['Volunteer', 'NGO_Admin', 'Platform_Admin'].includes(user?.role)
   const SUMMARY = [
     { label: 'Total cases reported', value: totalCases, delta: 'all time' },
     { label: 'Cases resolved',       value: resolved,   delta: `${resolutionPct}% resolution rate` },
     { label: 'In progress',          value: inProgress, delta: 'being handled now' },
-    { label: 'Hotspots detected',    value: clusters.length, delta: 'by DBSCAN clustering' },
+    ...(canViewHotspots ? [{ label: 'Hotspots detected', value: clusters.length, delta: 'by DBSCAN clustering' }] : []),
   ]
 
   return (
@@ -121,8 +124,8 @@ export default function Analytics() {
             </div>
           </section>
 
-          {/* HOTSPOTS */}
-          <section className="pm-hotspots">
+          {/* Hotspots are restricted to operational roles. */}
+          {canViewHotspots && <section className="pm-hotspots">
             <div className="container-pm">
               <p className="eyebrow pm-hotspots__eyebrow">Geospatial intelligence</p>
               <h2 className="pm-hotspots__title">Where strays are being reported most.</h2>
@@ -202,7 +205,7 @@ export default function Analytics() {
                 </p>
               )}
             </div>
-          </section>
+          </section>}
         </>
       )}
 

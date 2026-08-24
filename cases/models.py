@@ -38,14 +38,6 @@ class Case(models.Model):
         ('Unresolved',  'Unresolved'),
     ]
 
-    AGE_CHOICES = [
-        ('Puppy',    'Puppy'),
-        ('Kitten',   'Kitten'),
-        ('Calf',     'Calf'),
-        ('Juvenile', 'Juvenile'),
-        ('Adult',    'Adult'),
-        ('Senior',   'Senior'),
-    ]
 
     BYSTANDER_CHOICES = [
         ('none',          'None'),
@@ -67,7 +59,7 @@ class Case(models.Model):
     # ── animal details ────────────────────────────────────────
     species          = models.CharField(max_length=50)
     breed            = models.CharField(max_length=100, blank=True, default='Unknown')
-    estimated_age    = models.CharField(max_length=20, choices=AGE_CHOICES, default='Adult')
+    estimated_age    = models.CharField(max_length=50, blank=True, default='Unknown')
     severity         = models.SmallIntegerField(default=1)  # 1-5
     aggression_level = models.SmallIntegerField(default=1)  # 1-5
     injury_type      = models.CharField(max_length=200, blank=True, default='')

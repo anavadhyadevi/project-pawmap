@@ -96,7 +96,21 @@ class VolunteerListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return User.objects.filter(role='Volunteer')
+        qs = User.objects.filter(role='Volunteer')
+        if self.request.user.role == 'NGO_Admin':
+            return qs.filter(ngo=self.request.user)
+        if self.request.user.role == 'Platform_Admin':
+            return qs
+        return qs.none()
+
+
+class NgoListView(generics.ListAPIView):
+    """GET /api/users/ngos/ — public list used by the volunteer sign-up form."""
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return User.objects.filter(role='NGO_Admin', is_active=True).order_by('full_name')
 
 class VerifyVolunteerView(APIView):
     """
@@ -116,6 +130,16 @@ class VerifyVolunteerView(APIView):
             return Response(
                 {'error': 'Volunteer not found.'},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        if request.user.role == 'NGO_Admin' and volunteer.ngo_id != request.user.id:
+            return Response(
+                {'error': 'This volunteer is not affiliated with your NGO.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if request.user.role == 'NGO_Admin' and not request.user.is_verified:
+            return Response(
+                {'error': 'Your NGO account must be verified before you can approve volunteers.'},
+                status=status.HTTP_403_FORBIDDEN
             )
         volunteer.is_verified = True
         volunteer.save()
