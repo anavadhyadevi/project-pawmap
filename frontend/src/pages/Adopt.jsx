@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -27,8 +27,12 @@ function adaptAnimal(a, listingId = null) {
     listing_id: listingId,
   }
 }
-
 export default function Adopt() {
+  const { user, isLoggedIn } = useAuth()
+  if (isLoggedIn && user.role === 'NGO_Admin') {
+    return <Navigate to="/ngo/dashboard" replace />
+  }
+  
   const [animals, setAnimals]   = useState([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState('')

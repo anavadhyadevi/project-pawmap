@@ -184,6 +184,8 @@ export default function NgoDashboard() {
   const [approvalError, setApprovalError] = useState('')
   const [postingId, setPostingId]   = useState(null)
   const [postError, setPostError]   = useState('')
+  const [expandedListingId, setExpandedListingId] = useState(null)
+  const [approvingAdopterId, setApprovingAdopterId] = useState(null)
   const [showRegisterForm, setShowRegisterForm] = useState(false)
   const [activeTab, setActiveTab]   = useState('cases')
 
@@ -206,6 +208,31 @@ export default function NgoDashboard() {
   }, [accessToken])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  async function approveAdopter(listingId, adopterId) {
+    setApprovingAdopterId(adopterId)
+    try {
+      const res = await fetch(`${API}/adoption/${listingId}/approve/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ adopter_id: adopterId }),
+      })
+      if (res.ok) {
+        await fetchAll()
+        setExpandedListingId(null)
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Could not approve this adopter.')
+      }
+    } catch {
+      alert('Could not connect to server.')
+    } finally {
+      setApprovingAdopterId(null)
+    }
+  }
 
   if (authLoading) return null
   if (!isLoggedIn) return <Navigate to="/login" replace />
@@ -545,25 +572,59 @@ export default function NgoDashboard() {
                 ) : (
                   <div className="pm-ngo-listing-list">
                     {listings.filter(l => l.status === 'Active').map(l => (
-                      <div key={l.listing_id} className="pm-ngo-listing-row">
-                        <div className="pm-ngo-listing-row__thumb">
-                          {(l.animal?.photo || l.animal?.case_photo)
-                            ? <img src={l.animal.photo || l.animal.case_photo} alt={l.animal?.species} onError={e => e.target.style.display = 'none'} />
-                            : <PawPrint size={18} color="#d1d5db" />}
+                      <div key={l.listing_id}>
+                        <div className="pm-ngo-listing-row">
+                          <div className="pm-ngo-listing-row__thumb">
+                            {(l.animal?.photo || l.animal?.case_photo)
+                              ? <img src={l.animal.photo || l.animal.case_photo} alt={l.animal?.species} onError={e => e.target.style.display = 'none'} />
+                              : <PawPrint size={18} color="#d1d5db" />}
+                          </div>
+                          <div className="pm-ngo-listing-row__info">
+                            <p className="pm-ngo-listing-row__name">
+                              {l.animal?.name || `${l.animal?.species} · ${l.listing_id}`}
+                            </p>
+                            <p className="pm-ngo-listing-row__meta">
+                              {l.animal?.breed !== 'Unknown' ? l.animal?.breed : l.animal?.species} · {l.interest_count} interested
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="pm-ngo-outline-btn"
+                            style={{ fontSize: 12 }}
+                            onClick={() => setExpandedListingId(expandedListingId === l.listing_id ? null : l.listing_id)}
+                          >
+                            {expandedListingId === l.listing_id ? 'Hide interest' : `${l.interest_count} interested`}
+                          </button>
                         </div>
-                        <div className="pm-ngo-listing-row__info">
-                          <p className="pm-ngo-listing-row__name">
-                            {l.animal?.name || `${l.animal?.species} · ${l.listing_id}`}
-                          </p>
-                          <p className="pm-ngo-listing-row__meta">
-                            {l.animal?.breed !== 'Unknown' ? l.animal?.breed : l.animal?.species} · {l.interest_count} interested
-                          </p>
-                        </div>
-                        <Link to={`/adopt`}
-                          className="pm-ngo-outline-btn"
-                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-                          View live <ExternalLink size={12} />
-                        </Link>
+
+                        {expandedListingId === l.listing_id && (
+                          <div className="pm-ngo-interest-panel">
+                            {(!l.interests || l.interests.length === 0) ? (
+                              <p style={{ fontSize: 13, color: '#9ca3af', margin: 0 }}>No one has expressed interest yet.</p>
+                            ) : (
+                              l.interests.map((i) => (
+                                <div key={i.id} className="pm-ngo-interest-row">
+                                  <div>
+                                    <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>{i.adopter_name}</p>
+                                    <p style={{ fontSize: 12, color: '#9ca3af', margin: '2px 0 0' }}>
+                                      Expressed {new Date(i.expressed_at).toLocaleDateString()}
+                                      {i.home_readiness_complete ? ' · Home check complete' : ' · Home check pending'}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="btn-pm btn-pm--orange"
+                                    style={{ fontSize: 12, padding: '6px 14px' }}
+                                    disabled={approvingAdopterId === i.id}
+                                    onClick={() => approveAdopter(l.listing_id, i.adopter)}
+                                  >
+                                    {approvingAdopterId === i.id ? 'Approving…' : 'Approve'}
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

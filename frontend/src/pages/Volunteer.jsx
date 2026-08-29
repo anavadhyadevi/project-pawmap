@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { CheckCircle2, Clock, Handshake, MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
@@ -29,9 +29,21 @@ const EXPECTATIONS = [
 
 export default function Volunteer() {
   const { user, isLoggedIn, loading } = useAuth()
-  const [form, setForm] = useState({ availability: '', experience: '', reason: '' })
+  const [form, setForm] = useState({ availability: '', experience: '', reason: '', ngo: '' })
   const [submitting, setSubmitting] = useState(false)
   const [applied, setApplied] = useState(false)
+  const [ngos, setNgos] = useState([])
+  const [ngosLoading, setNgosLoading] = useState(false)
+  const [ngoError, setNgoError] = useState('')
+
+  useEffect(() => {
+    setNgosLoading(true)
+    fetch('http://localhost:8000/api/users/ngos/')
+      .then((r) => r.json())
+      .then((data) => setNgos(data.results ?? data))
+      .catch(() => setNgoError('Could not load the NGO list. Please try again.'))
+      .finally(() => setNgosLoading(false))
+  }, [])
 
   if (loading) return null
 
@@ -49,8 +61,15 @@ export default function Volunteer() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
+  const [errors, setErrors] = useState({})
+
   async function handleApply(e) {
     e.preventDefault()
+    if (!form.ngo) {
+      setErrors({ ngo: 'Choose the NGO you will work with.' })
+      return
+    }
+    setErrors({})
     setSubmitting(true)
     try {
       // Wire this up to POST /api/users/volunteer-application/ (or similar)
@@ -131,6 +150,26 @@ export default function Volunteer() {
                   You're signed in as <strong>{user.full_name}</strong> — this applies your
                   existing account for volunteer access, no new signup needed.
                 </p>
+
+                <div className={`pm-field ${errors.ngo ? 'pm-field--error' : ''}`}>
+                  <label htmlFor="ngo">Affiliated NGO</label>
+                  <select
+                    id="ngo"
+                    value={form.ngo}
+                    onChange={(e) => update('ngo', e.target.value)}
+                    disabled={ngosLoading}
+                  >
+                    <option value="">{ngosLoading ? 'Loading NGOs…' : 'Choose an NGO'}</option>
+                    {ngos.map((n) => (
+                      <option key={n.id} value={n.id}>{n.full_name}</option>
+                    ))}
+                  </select>
+                  {errors.ngo && <p className="pm-field__error">{errors.ngo}</p>}
+                  {ngoError && <p className="pm-field__error">{ngoError}</p>}
+                  {!ngosLoading && ngos.length === 0 && !ngoError && (
+                    <p className="pm-field__error">No NGO accounts are available yet.</p>
+                  )}
+                </div>
 
                 <div className="pm-field">
                   <label htmlFor="availability">Availability</label>
