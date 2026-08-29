@@ -172,7 +172,7 @@ export default function VolunteerDashboard() {
   if (!isLoggedIn) return <Navigate to="/login" replace />
   if (user?.role !== 'Volunteer') return <Navigate to="/volunteer" replace />
 
-  const myCases    = cases.filter((c) => c.status === 'in_progress' && c.volunteerId === user?.id)
+  const myCases    = cases.filter((c) => ['in_progress', 'on_site'].includes(c.status) && c.volunteerId === user?.id)
   const activeWards = new Set(myCases.map((c) => c.ward))
 
   function canClaim(targetCase) {
