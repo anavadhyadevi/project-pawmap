@@ -29,6 +29,7 @@ const SEVERITY_CLASS  = { 1: 'low', 2: 'low', 3: 'medium', 4: 'high', 5: 'high' 
 const STATUS_MAP = {
   'Open':        'reported',
   'In_Progress': 'in_progress',
+  'On_Site':     'on_site',
   'Resolved':    'resolved',
   'Escalated':   'escalated',
   'Unresolved':  'unresolved',
@@ -95,6 +96,7 @@ export default function VolunteerDashboard() {
   const [error, setError]     = useState('')
   const [severityFilter, setSeverityFilter] = useState('all')
   const [claiming, setClaiming] = useState(null)
+  const [claimedCases, setClaimedCases] = useState([])
 
   const fetchCases = useCallback(async () => {
     try {
@@ -127,13 +129,26 @@ export default function VolunteerDashboard() {
     }
   }, [accessToken])
 
+  const fetchClaimedCases = useCallback(async () => {
+    if (!accessToken) return
+    try {
+      const res = await fetch(`${API}/cases/my-volunteer-cases/`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      if (!res.ok) throw new Error('Could not load claimed cases.')
+      const data = await res.json()
+      setClaimedCases((data.results ?? data).map(adaptCase))
+    } catch (err) {
+      setError(err.message)
+    }
+  }, [accessToken])
+
   useEffect(() => {
     fetchCases()
     fetchVrsScore()
+    fetchClaimedCases()
     // poll every 30 seconds for new cases
     const interval = setInterval(fetchCases, 30000)
     return () => clearInterval(interval)
-  }, [fetchCases, fetchVrsScore])
+  }, [fetchCases, fetchVrsScore, fetchClaimedCases])
 
   // Hooks must run in the same order on every render. Authentication is
   // restored asynchronously after a refresh, so this needs to be above the
@@ -179,7 +194,7 @@ export default function VolunteerDashboard() {
         body: JSON.stringify({ note: 'On my way!' }),
       })
       if (res.ok) {
-        await fetchCases() // refresh the list
+        await Promise.all([fetchCases(), fetchClaimedCases()])
       } else {
         const data = await res.json()
         alert(data.error || 'Could not claim case.')
@@ -211,7 +226,7 @@ export default function VolunteerDashboard() {
         body: JSON.stringify({ status: djangoStatus }),
       })
       if (res.ok) {
-        await fetchCases()
+        await Promise.all([fetchCases(), fetchClaimedCases()])
       } else {
         const data = await res.json()
         alert(data.error || 'Could not update status.')
@@ -317,6 +332,25 @@ export default function VolunteerDashboard() {
                         </button>
                       )}
                     </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {claimedCases.length > 0 && (
+        <section className="pm-vd-mine">
+          <div className="container-pm">
+            <h2 className="pm-vd-section-title">Your claimed cases</h2>
+            <div className="pm-vd-grid">
+              {claimedCases.map((c) => (
+                <article key={c.id} className="pm-vd-card pm-vd-card--mine">
+                  <div className="pm-vd-card__body">
+                    <div className="pm-vd-card__row"><h3>{c.species} · {c.id}</h3><span className="pm-vd-status">{c.status.replace('_', ' ')}</span></div>
+                    <p className="pm-vd-card__meta"><MapPin size="1em" aria-hidden="true" /> {c.location}</p>
+                    <p className="pm-vd-card__injury">{c.injuryType}</p>
                   </div>
                 </article>
               ))}

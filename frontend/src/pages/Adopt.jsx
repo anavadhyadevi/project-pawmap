@@ -8,8 +8,12 @@ import './adopt.css'
 const API = 'http://localhost:8000/api'
 const SPECIES_FILTERS = ['All', 'Dog', 'Cat', 'Cow', 'Other']
 
-// adapt Django animal to sreya's expected shape
+// adapt Django animal to expected shape
 function adaptAnimal(a, listingId = null) {
+  // prefer the animal's own photo, then fall back to the photo from the
+  // original case report (case_photo), and finally a generic placeholder
+  const PLACEHOLDER = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop'
+  const photo = a.photo || a.case_photo || PLACEHOLDER
   return {
     id:         a.animal_id,
     name:       a.breed !== 'Unknown' ? `${a.species} · ${a.breed}` : a.species,
@@ -18,38 +22,35 @@ function adaptAnimal(a, listingId = null) {
     age:        a.estimated_age || 'Unknown age',
     location:   'Bengaluru',
     rating:     a.temperament_score ? parseFloat(a.temperament_score) : null,
-    photo:      a.photo || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop',
+    photo,
     features:   a.distinguishing_features || '',
     listing_id: listingId,
   }
 }
 
 export default function Adopt() {
-  const { accessToken, isLoggedIn } = useAuth()
-  const [animals, setAnimals]       = useState([])
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState('')
-  const [species, setSpecies]       = useState('All')
-  const [search, setSearch]         = useState('')
-  const [expressing, setExpressing] = useState(null)
-  const [success, setSuccess]       = useState('')
+  const [animals, setAnimals]   = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
+  const [species, setSpecies]   = useState('All')
+  const [search, setSearch]     = useState('')
 
   useEffect(() => {
-  Promise.all([
-    fetch(`${API}/animals/?adoption_status=Available`).then(r => r.json()),
-    fetch(`${API}/adoption/`).then(r => r.json()),
-  ]).then(([animalsData, listingsData]) => {
-    const listings = listingsData.results ?? listingsData
-    const animalsList = (animalsData.results ?? animalsData).map(a => {
-      // find the listing for this animal
-      const listing = listings.find(l => l.animal.animal_id === a.animal_id)
-      return adaptAnimal(a, listing?.listing_id || null)
+    Promise.all([
+      fetch(`${API}/animals/?adoption_status=Available`).then(r => r.json()),
+      fetch(`${API}/adoption/`).then(r => r.json()),
+    ]).then(([animalsData, listingsData]) => {
+      const listings = listingsData.results ?? listingsData
+      const animalsList = (animalsData.results ?? animalsData).map(a => {
+        // find the listing for this animal
+        const listing = listings.find(l => l.animal.animal_id === a.animal_id)
+        return adaptAnimal(a, listing?.listing_id || null)
+      })
+      setAnimals(animalsList)
     })
-    setAnimals(animalsList)
-  })
-  .catch(() => setError('Could not load animals.'))
-  .finally(() => setLoading(false))
-}, [])
+    .catch(() => setError('Could not load animals.'))
+    .finally(() => setLoading(false))
+  }, [])
 
   const filtered = useMemo(() => {
     return animals.filter((a) => {
@@ -58,38 +59,6 @@ export default function Adopt() {
       return matchesSpecies && matchesSearch
     })
   }, [animals, species, search])
-
-  async function expressInterest(listingId, animalName) {
-    if (!isLoggedIn) {
-      alert('Please log in to express interest in adopting.')
-      return
-    }
-    if (!listingId) {
-      alert('This animal does not have an active adoption listing yet.')
-      return
-    }
-    setExpressing(listingId)
-    try {
-      const res = await fetch(`${API}/adoption/${listingId}/interest/`, {
-        method:  'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setSuccess(`Your interest in ${animalName} has been noted! The NGO will be in touch.`)
-        setTimeout(() => setSuccess(''), 5000)
-      } else {
-        alert(data.error || 'Could not express interest.')
-      }
-    } catch {
-      alert('Could not connect to server.')
-    } finally {
-      setExpressing(null)
-    }
-  }
 
   return (
     <div className="pm-adopt-page">
@@ -107,12 +76,6 @@ export default function Adopt() {
 
       <section className="pm-adopt-list">
         <div className="container-pm">
-
-          {success && (
-            <div style={{ marginBottom: 20, padding: '12px 16px', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 8 }}>
-              <p style={{ color: '#166534', fontSize: 14 }}>{success}</p>
-            </div>
-          )}
 
           {error && (
             <div style={{ marginBottom: 20, padding: '12px 16px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8 }}>
@@ -164,7 +127,7 @@ export default function Adopt() {
                   </div>
                   <div className="pm-animal-card__body">
                     <div className="pm-animal-card__row">
-                      <h3>{a.name}</h3>
+                      <h3><Link to={`/adopt/${a.id}`}>{a.name}</Link></h3>
                       <span className="pm-animal-card__tag">{a.tag}</span>
                     </div>
                     <p className="pm-animal-card__meta">{a.age}</p>
@@ -176,13 +139,15 @@ export default function Adopt() {
                         ★★★★★ <span>{a.rating.toFixed(1)} / 5.0</span>
                       </div>
                     )}
-                    <button
-                      type="button"
+                    <Link to={`/adopt/${a.id}`} className="btn-pm btn-pm--outline-light btn-pm--full pm-adopt-cta" style={{ marginBottom: 8 }}>
+                      View details
+                    </Link>
+                    <Link
+                      to={`/adopt/${a.id}`}
                       className="btn-pm btn-pm--outline-light btn-pm--full pm-adopt-cta"
-                      onClick={() => expressInterest(a.listing_id, a.name)}
-                      disabled={expressing === a.listing_id}>
-                      {expressing === a.listing_id ? 'Submitting...' : `Ask about ${a.name}`}
-                    </button>
+                    >
+                      Ask about {a.name}
+                    </Link>
                   </div>
                 </div>
               ))}
