@@ -8,12 +8,23 @@ import './adopt.css'
 const API = 'http://localhost:8000/api'
 const SPECIES_FILTERS = ['All', 'Dog', 'Cat', 'Cow', 'Other']
 
+const PLACEHOLDER_BY_SPECIES = {
+  Dog: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop',
+  Cat: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=80&w=600&auto=format&fit=crop',
+  Cow: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=600&auto=format&fit=crop',
+  Bird: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?q=80&w=600&auto=format&fit=crop',
+  Other: 'https://placehold.co/600x400?text=PawMap+animal',
+}
+
+function fallbackPhoto(species) {
+  return PLACEHOLDER_BY_SPECIES[species] || PLACEHOLDER_BY_SPECIES.Other
+}
+
 // adapt Django animal to expected shape
 function adaptAnimal(a, listingId = null) {
   // prefer the animal's own photo, then fall back to the photo from the
   // original case report (case_photo), and finally a generic placeholder
-  const PLACEHOLDER = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop'
-  const photo = a.photo || a.case_photo || PLACEHOLDER
+  const photo = a.photo || a.case_photo || fallbackPhoto(a.species)
   return {
     id:         a.animal_id,
     name:       a.breed !== 'Unknown' ? `${a.species} · ${a.breed}` : a.species,
@@ -124,7 +135,7 @@ export default function Adopt() {
                   <div className="pm-animal-card__photo">
                     <img src={a.photo} alt={a.name} loading="lazy"
                       onError={e => {
-                        e.target.src = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=600&auto=format&fit=crop'
+                        e.target.src = fallbackPhoto(a.species)
                       }}/>
                     <span className="pm-animal-card__id">{a.id}</span>
                     <span className="pm-animal-card__dot" title="Available"/>

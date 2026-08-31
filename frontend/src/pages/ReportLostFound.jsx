@@ -8,7 +8,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { API_BASE_URL } from '../lib/api.js'
-import { reverseGeocode } from '../lib/geocode.js'
+import { forwardGeocode, reverseGeocode } from '../lib/geocode.js'
 import './reportLostFound.css'
 import './report.css'
 
@@ -56,8 +56,6 @@ export default function ReportLostFound() {
     location: '', // Stores coordinates as "place_name (lat, lon)"
     features: '',
     microchipId: '',
-    contactName: '',
-    contactPhone: '',
   })
   const [latLng, setLatLng] = useState(null)
   const [placeName, setPlaceName] = useState('')
@@ -84,8 +82,6 @@ export default function ReportLostFound() {
     if (type === 'lost' && !form.petName.trim()) next.petName = "Enter your pet's name."
     if (!latLng) next.location = 'Please tap on the map to specify the location.'
     if (!form.date) next.date = type === 'lost' ? 'When did you last see them?' : 'When did you find them?'
-    if (!form.contactName.trim()) next.contactName = 'Enter your name.'
-    if (!/^\d{10}$/.test(form.contactPhone.replace(/\D/g, ''))) next.contactPhone = 'Enter a 10-digit phone number.'
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -95,6 +91,19 @@ export default function ReportLostFound() {
     const name = await reverseGeocode(coords.lat, coords.lng)
     setPlaceName(name)
     update('location', `${name} (${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)})`)
+  }
+
+  async function handleTypedLocation() {
+    const result = await forwardGeocode(placeName)
+    if (!result) {
+      setErrors((previous) => ({ ...previous, location: 'We could not find that location. Try a more specific address.' }))
+      return
+    }
+    setLatLng(result)
+    setMapCenter([result.lat, result.lng])
+    setPlaceName(result.name)
+    update('location', `${result.name} (${result.lat.toFixed(6)}, ${result.lng.toFixed(6)})`)
+    setErrors((previous) => ({ ...previous, location: undefined }))
   }
 
   async function handleSubmit(e) {
@@ -328,7 +337,8 @@ export default function ReportLostFound() {
                       update('location', e.target.value)
                     }
                   }}
-                  placeholder="Tap map to get readable location name..."
+                  onBlur={handleTypedLocation}
+                  placeholder="Type an address, or tap the map..."
                   style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px' }}
                 />
               </div>
@@ -373,29 +383,11 @@ export default function ReportLostFound() {
               />
             </div>
 
-            <div className="pm-field-grid">
-              <div className={`pm-field ${errors.contactName ? 'pm-field--error' : ''}`}>
-                <label htmlFor="contactName">Your name</label>
-                <input
-                  id="contactName"
-                  value={form.contactName}
-                  onChange={(e) => update('contactName', e.target.value)}
-                  placeholder="Anjali Rao"
-                />
-                {errors.contactName && <p className="pm-field__error">{errors.contactName}</p>}
-              </div>
-              <div className={`pm-field ${errors.contactPhone ? 'pm-field--error' : ''}`}>
-                <label htmlFor="contactPhone">Your phone</label>
-                <input
-                  id="contactPhone"
-                  type="tel"
-                  value={form.contactPhone}
-                  onChange={(e) => update('contactPhone', e.target.value)}
-                  placeholder="98765 43210"
-                />
-                {errors.contactPhone && <p className="pm-field__error">{errors.contactPhone}</p>}
-              </div>
-            </div>
+            {type === 'lost' && (
+              <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
+                Your account details are used if a volunteer needs to follow up.
+              </p>
+            )}
 
             {errors.submit && <p className="pm-field__error" style={{ marginBottom: '12px' }}>{errors.submit}</p>}
             <button type="submit" className="btn-pm btn-pm--orange btn-pm--full" disabled={submitting}>

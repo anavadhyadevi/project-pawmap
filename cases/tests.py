@@ -45,6 +45,14 @@ class PawMapTests(APITestCase):
             role="Volunteer",
             is_verified=True
         )
+        self.ngo = User.objects.create_user(
+            email="ngo@test.com", password="testpassword", full_name="Test NGO",
+            role="NGO_Admin", is_verified=True,
+        )
+        self.ngo_volunteer = User.objects.create_user(
+            email="ngo-volunteer@test.com", password="testpassword", full_name="NGO Volunteer",
+            role="Volunteer", is_verified=True, ngo=self.ngo,
+        )
 
         # Force authenticate the volunteer client
         self.client.force_authenticate(user=self.volunteer)
@@ -124,3 +132,28 @@ class PawMapTests(APITestCase):
         self.client.force_authenticate(user=self.another_volunteer)
         response2 = self.client.patch(url, {'note': 'Claiming too'})
         self.assertEqual(response2.status_code, status.HTTP_409_CONFLICT)
+
+    def test_ngo_case_list_includes_unclaimed_and_own_cases_only(self):
+        unclaimed = Case.objects.create(
+            latitude=12.9348, longitude=77.6189, ward=self.ward,
+            species="Dog", severity=3, reporter=self.reporter,
+        )
+        own_case = Case.objects.create(
+            latitude=12.9348, longitude=77.6189, ward=self.ward,
+            species="Cat", severity=3, reporter=self.reporter,
+            volunteer=self.ngo_volunteer, status="In_Progress",
+        )
+        other_ngo_case = Case.objects.create(
+            latitude=12.9348, longitude=77.6189, ward=self.ward,
+            species="Cow", severity=3, reporter=self.reporter,
+            volunteer=self.volunteer, status="In_Progress",
+        )
+
+        self.client.force_authenticate(user=self.ngo)
+        response = self.client.get('/api/cases/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case_ids = {case['case_id'] for case in response.data['results']}
+        self.assertIn(unclaimed.case_id, case_ids)
+        self.assertIn(own_case.case_id, case_ids)
+        self.assertNotIn(other_ngo_case.case_id, case_ids)

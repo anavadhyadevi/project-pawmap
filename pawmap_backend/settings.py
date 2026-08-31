@@ -162,3 +162,13 @@ USE_TZ = True
 
 # ── Default primary key ────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Email ──────────────────────────────────────────────────────────────────
+# DEV: prints emails to the console instead of sending them.
+# In production: swap to 'django.core.mail.backends.smtp.EmailBackend'
+# and configure EMAIL_HOST / EMAIL_PORT / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FROM    = 'noreply@pawmap.app'
+
+# Password-reset token TTL in seconds (15 minutes)
+PASSWORD_RESET_TTL = 900

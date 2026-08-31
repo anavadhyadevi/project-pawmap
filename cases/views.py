@@ -2,6 +2,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import Case, CaseStatusLog, CaseNotification, LostPetReport, FoundPetReport
@@ -16,7 +17,8 @@ from pawmap_backend.geo import get_nearby_volunteer_ids
 
 class CaseListCreateView(generics.ListCreateAPIView):
     """
-    GET  /api/cases/     — list all open cases (public)
+    GET  /api/cases/     — public list; NGO Admins see unclaimed cases plus
+                            cases handled by volunteers in their NGO
     POST /api/cases/     — submit a new case (authenticated)
     """
     queryset = Case.objects.all()
@@ -33,6 +35,13 @@ class CaseListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = Case.objects.all()
+        if self.request.user.is_authenticated and self.request.user.role == 'NGO_Admin':
+            # Unclaimed cases are a shared queue. Claimed cases belong only
+            # to the NGO affiliated with the claiming volunteer.
+            qs = qs.filter(
+                Q(volunteer__isnull=True) |
+                Q(volunteer__ngo=self.request.user)
+            )
         status_filter = self.request.query_params.get('status')
         if status_filter:
             qs = qs.filter(status=status_filter)

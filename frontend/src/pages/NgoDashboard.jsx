@@ -59,9 +59,9 @@ function SeverityDots({ level }) {
 }
 
 // ─── Register Animal form ────────────────────────────────────────────────────
-function RegisterAnimalForm({ accessToken, onCreated }) {
+function RegisterAnimalForm({ accessToken, cases, onCreated }) {
   const [form, setForm] = useState({
-    name: '', species: 'Dog', breed: '', estimated_age: '', ownership_status: 'Stray'
+    name: '', species: 'Dog', breed: '', estimated_age: '', ownership_status: 'Stray', case: ''
   })
   const [photo, setPhoto] = useState(null)
   const [submitting, setSubmitting] = useState(false)
@@ -76,13 +76,14 @@ function RegisterAnimalForm({ accessToken, onCreated }) {
         estimated_age: form.estimated_age || 'Unknown', ownership_status: form.ownership_status })
         .forEach(([k, v]) => body.append(k, v))
       if (form.name) body.append('name', form.name)
+      if (form.case) body.append('case', form.case)
       if (photo) body.append('photo', photo)
       const res = await fetch(`${API}/animals/`, {
         method: 'POST', headers: { Authorization: `Bearer ${accessToken}` }, body,
       })
       if (!res.ok) throw new Error(JSON.stringify(await res.json().catch(() => ({}))))
       onCreated(await res.json())
-      setForm({ name: '', species: 'Dog', breed: '', estimated_age: '', ownership_status: 'Stray' })
+      setForm({ name: '', species: 'Dog', breed: '', estimated_age: '', ownership_status: 'Stray', case: '' })
       setPhoto(null)
     } catch (err) { setError(err.message) }
     finally { setSubmitting(false) }
@@ -112,6 +113,23 @@ function RegisterAnimalForm({ accessToken, onCreated }) {
           <label>Ownership status</label>
           <select value={form.ownership_status} onChange={e => setForm(f => ({ ...f, ownership_status: e.target.value }))}>
             {['Stray','Abandoned','Unknown'].map(o => <option key={o}>{o}</option>)}
+          </select>
+        </div>
+        <div className="pm-ngo-form-field">
+          <label>Resolved case (optional)</label>
+          <select value={form.case} onChange={e => {
+            const selected = cases.find(c => c.case_id === e.target.value)
+            setForm(f => ({
+              ...f,
+              case: e.target.value,
+              species: selected?.species || f.species,
+              breed: selected?.breed && selected.breed !== 'Unknown' ? selected.breed : f.breed,
+            }))
+          }}>
+            <option value="">No linked case</option>
+            {cases.filter(c => c.status === 'Resolved').map(c => (
+              <option key={c.case_id} value={c.case_id}>{c.case_id} · {c.species}</option>
+            ))}
           </select>
         </div>
         <div className="pm-ngo-form-field">
@@ -511,6 +529,7 @@ export default function NgoDashboard() {
                 {showRegisterForm && (
                   <RegisterAnimalForm
                     accessToken={accessToken}
+                    cases={cases}
                     onCreated={a => { setAnimals(p => [a, ...p]); setShowRegisterForm(false) }}
                   />
                 )}

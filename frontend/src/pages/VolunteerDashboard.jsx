@@ -39,7 +39,7 @@ function timeAgo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
   const mins = Math.round(diffMs / 60000)
   if (mins < 60) return `${mins} min ago`
-  const hrs = Math.round(diffMs / 60)
+  const hrs = Math.round(diffMs / 3600000)
   if (hrs < 24) return `${hrs} hr ago`
   return `${Math.round(hrs / 24)} day ago`
 }

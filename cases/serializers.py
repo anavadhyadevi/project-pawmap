@@ -88,8 +88,9 @@ class ClaimCaseSerializer(serializers.Serializer):
 
 
 class UpdateStatusSerializer(serializers.Serializer):
+    # Keep in sync with Case.STATUS_CHOICES (minus Open/In_Progress which are
+    # set by the claim flow, not by manual status updates).
     STATUS_CHOICES = [
-        ('En_Route',    'En Route'),
         ('On_Site',     'On Site'),
         ('Resolved',    'Resolved'),
         ('Escalated',   'Escalated'),

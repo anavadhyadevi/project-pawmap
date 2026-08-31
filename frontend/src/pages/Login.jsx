@@ -120,7 +120,7 @@ export default function Login() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <input type="checkbox" name="remember" /> Remember me
               </label>
-              <a href="#" className="pm-auth__forgot">Forgot password?</a>
+              <Link to="/forgot-password" className="pm-auth__forgot">Forgot password?</Link>
             </div>
 
             <button type="submit" className="btn-pm btn-pm--orange btn-pm--full" disabled={submitting}>

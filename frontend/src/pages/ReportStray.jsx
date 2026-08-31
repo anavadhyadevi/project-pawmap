@@ -8,7 +8,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import Navbar from '../components/Navbar.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { API_BASE_URL } from '../lib/api.js'
-import { reverseGeocode } from '../lib/geocode.js'
+import { forwardGeocode, reverseGeocode } from '../lib/geocode.js'
 import './report.css'
 
 // Fix leaflet icon loading issue in Vite
@@ -135,6 +135,18 @@ export default function ReportStray() {
     setLatLng(coords)
     const name = await reverseGeocode(coords.lat, coords.lng)
     setPlaceName(name)
+  }
+
+  async function handleTypedLocation() {
+    const result = await forwardGeocode(placeName)
+    if (!result) {
+      setErrors((previous) => ({ ...previous, location: 'We could not find that location. Try a more specific address.' }))
+      return
+    }
+    setLatLng(result)
+    setMapCenter([result.lat, result.lng])
+    setPlaceName(result.name)
+    setErrors((previous) => ({ ...previous, location: undefined }))
   }
 
   async function handleSubmit(e) {
@@ -326,7 +338,8 @@ export default function ReportStray() {
                   type="text"
                   value={placeName}
                   onChange={(e) => setPlaceName(e.target.value)}
-                  placeholder="Tap map to get readable location name..."
+                  onBlur={handleTypedLocation}
+                  placeholder="Type an address, or tap the map..."
                   style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px' }}
                 />
               </div>

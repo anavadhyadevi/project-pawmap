@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Animal, TemperamentRating
+from cases.models import Case
 
 
 class TemperamentRatingSerializer(serializers.ModelSerializer):
@@ -24,6 +25,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     case_id = serializers.CharField(source='case.case_id', read_only=True)
     listing_id = serializers.CharField(source='adoption_listing.listing_id', read_only=True, required=False, allow_null=True)
     medical_summary = serializers.SerializerMethodField()
+    medical_records_count = serializers.SerializerMethodField()
     case_photo = serializers.SerializerMethodField()
 
     def get_medical_summary(self, animal):
@@ -33,6 +35,9 @@ class AnimalSerializer(serializers.ModelSerializer):
              'details': record.details, 'timestamp': record.timestamp}
             for record in records
         ]
+
+    def get_medical_records_count(self, animal):
+        return animal.medical_records.count()
 
     def get_case_photo(self, animal):
         """Return the URL of the photo from the linked case report, if any."""
@@ -55,12 +60,19 @@ class AnimalSerializer(serializers.ModelSerializer):
             'temperament_score', 'adoption_status', 'ownership_status',
             'case_id', 'current_foster', 'current_foster_name',
             'created_at', 'updated_at',
-            'temperament_ratings', 'medical_summary', 'listing_id',
+            'temperament_ratings', 'medical_summary', 'medical_records_count', 'listing_id',
         ]
         read_only_fields = ['animal_id', 'temperament_score', 'created_at', 'updated_at']
 
 
 class AnimalCreateSerializer(serializers.ModelSerializer):
+    # The UI and the rest of the API expose a case by its public CASE-xxxx
+    # identifier, not the database PK.
+    case = serializers.SlugRelatedField(
+        slug_field='case_id', queryset=Case.objects.all(),
+        required=False, allow_null=True,
+    )
+
     class Meta:
         model  = Animal
         fields = [

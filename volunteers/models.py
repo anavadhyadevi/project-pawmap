@@ -52,7 +52,10 @@ class VolunteerReliabilityScore(models.Model):
         cases_completed = claimed_cases.filter(status='Resolved').count()
 
         response_rate = (cases_responded / cases_notified) if cases_notified else 0
-        completion_rate = (cases_completed / cases_responded) if cases_responded else 0
+        # A volunteer can legitimately claim a case from the shared queue without
+        # first receiving a notification.  Completion must therefore be measured
+        # against cases they actually claimed, otherwise resolved work is omitted.
+        completion_rate = (cases_completed / claimed_cases.count()) if claimed_cases.exists() else 0
 
         response_times = list(
             claimed_cases.exclude(response_time_min__isnull=True).values_list('response_time_min', flat=True)
