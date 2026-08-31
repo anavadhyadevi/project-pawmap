@@ -16,6 +16,8 @@ import About from './pages/About.jsx'
 import Analytics from './pages/Analytics.jsx'
 import LostFound from './pages/LostFound.jsx'
 import ReportLostFound from './pages/ReportLostFound.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -46,6 +48,8 @@ export default function App() {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/lost-found" element={<LostFound />} />
       <Route path="/lost-found/report" element={<ReportLostFound />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </>
   )

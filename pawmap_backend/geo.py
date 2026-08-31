@@ -1,7 +1,12 @@
 import math
 import redis
 
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+# Location pings are an optional enhancement.  A missing/unavailable Redis
+# service must never prevent a reporter from creating a case.
+redis_client = redis.Redis(
+    host='localhost', port=6379, db=0, decode_responses=True,
+    socket_connect_timeout=0.5, socket_timeout=0.5,
+)
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -15,15 +20,19 @@ def haversine_km(lat1, lon1, lat2, lon2):
 
 def get_nearby_volunteer_ids(case_lat, case_lon, radius_km=5):
     nearby = []
-    for key in redis_client.scan_iter('volunteer_location:*'):
-        value = redis_client.get(key)
-        if not value:
-            continue
-        try:
-            lat_str, lon_str = value.split(',')
-            v_lat, v_lon = float(lat_str), float(lon_str)
-        except ValueError:
-            continue
-        if haversine_km(float(case_lat), float(case_lon), v_lat, v_lon) <= radius_km:
-            nearby.append(key.split(':')[1])
+    try:
+        for key in redis_client.scan_iter('volunteer_location:*'):
+            value = redis_client.get(key)
+            if not value:
+                continue
+            try:
+                lat_str, lon_str = value.split(',')
+                v_lat, v_lon = float(lat_str), float(lon_str)
+            except ValueError:
+                continue
+            if haversine_km(float(case_lat), float(case_lon), v_lat, v_lon) <= radius_km:
+                nearby.append(key.split(':')[1])
+    except redis.RedisError:
+        # The case still saves; notifications are skipped until Redis returns.
+        return []
     return nearby

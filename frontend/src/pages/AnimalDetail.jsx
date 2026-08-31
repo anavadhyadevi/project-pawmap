@@ -7,6 +7,14 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { API_BASE_URL } from '../lib/api.js'
 import './animalDetail.css'
 
+const PLACEHOLDER_BY_SPECIES = {
+  Dog: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=900&auto=format&fit=crop',
+  Cat: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=80&w=900&auto=format&fit=crop',
+  Cow: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=900&auto=format&fit=crop',
+  Bird: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?q=80&w=900&auto=format&fit=crop',
+  Other: 'https://placehold.co/900x600?text=PawMap+animal',
+}
+
 function adaptDetailedAnimal(a) {
   return {
     id: a.animal_id,
@@ -18,7 +26,7 @@ function adaptDetailedAnimal(a) {
     location: 'Bengaluru',
     tag: a.ownership_status || 'Stray',
     rating: a.temperament_score ? parseFloat(a.temperament_score) : null,
-    photo: a.photo || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=900&auto=format&fit=crop',
+    photo: a.photo || a.case_photo || PLACEHOLDER_BY_SPECIES[a.species] || PLACEHOLDER_BY_SPECIES.Other,
     story: a.distinguishing_features || 'No details available.',
     vaccinated: false,
     neutered: false,
